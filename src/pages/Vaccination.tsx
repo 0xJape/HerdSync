@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Calendar,
   Syringe,
@@ -145,13 +145,16 @@ const vaccinationRecords = [
 
 // Upcoming vaccinations schedule
 const upcomingVaccinations = [
-  { livestockId: 'C-008', name: 'Brahman Bull', vaccine: 'FMD Vaccine', dueDate: '2025-12-10', daysLeft: 18 },
-  { livestockId: 'G-019', name: 'Boer Maiden Doe', vaccine: 'CDT Vaccine', dueDate: '2025-12-10', daysLeft: 18 },
-  { livestockId: 'S-005', name: 'Dorper Ewe', vaccine: 'CDT Vaccine', dueDate: '2025-12-08', daysLeft: 16 },
-  { livestockId: 'G-012', name: 'Boer Doe', vaccine: 'Rabies Vaccine', dueDate: '2025-11-15', daysLeft: -7, overdue: true }
+  { livestockId: 'C-008', name: 'Brahman Bull', vaccine: 'Vitamin B-Complex', dueDate: '2025-12-10', daysLeft: 10 },
+  { livestockId: 'G-019', name: 'Boer Maiden Doe', vaccine: 'Deworming (Ivermectin)', dueDate: '2025-12-10', daysLeft: 10 },
+  { livestockId: 'S-005', name: 'Dorper Ewe', vaccine: 'Vitamin Supplement', dueDate: '2025-12-08', daysLeft: 8 },
+  { livestockId: 'G-012', name: 'Boer Doe', vaccine: 'Deworming (Levamisole)', dueDate: '2025-12-05', daysLeft: 5 }
 ];
 
 export default function Vaccination() {
+  const [searchParams] = useSearchParams();
+  const livestockIdFromUrl = searchParams.get('livestockId');
+  
   const [searchQuery, setSearchQuery] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState<'all' | 'completed' | 'due-soon' | 'overdue'>('all');
   const [speciesFilter, setSpeciesFilter] = React.useState<'all' | 'cattle' | 'goat' | 'sheep'>('all');
@@ -211,14 +214,70 @@ export default function Vaccination() {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
     
-    // Reset treatment name when treatment type changes
+    // Reset treatment name when treatment type changes and auto-set scheduling
     if (name === 'treatmentType') {
+      // Calculate next due date based on treatment type
+      let nextDueDate = '';
+      let setReminder = false;
+      let notes = formData.notes;
+      
+      if (value === 'Vitamins') {
+        // Vitamins: Every 2 weeks
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + 14);
+        nextDueDate = dueDate.toISOString().split('T')[0];
+        setReminder = true;
+        notes = notes || 'Scheduled for routine vitamin supplementation every 2 weeks';
+      } else if (value === 'Dewormer') {
+        // Dewormer: Every 3-6 months (default to 3 months)
+        const dueDate = new Date();
+        dueDate.setMonth(dueDate.getMonth() + 3);
+        nextDueDate = dueDate.toISOString().split('T')[0];
+        setReminder = true;
+        notes = notes || 'Scheduled for routine deworming (3-6 months interval, adjust as needed)';
+      } else if (value === 'Antibiotics' || value === 'Anti-Inflammatory') {
+        // Antibiotics/Anti-Inflammatory: Only when sick, no automatic scheduling
+        // Set 3-day checkup if pain/symptoms remain
+        nextDueDate = '';
+        setReminder = false;
+        if (value === 'Antibiotics') {
+          notes = notes || '⚠️ AMR Treatment - 21 day withdrawal period. Checkup required every 3 days if symptoms persist.';
+        } else {
+          notes = notes || '⚠️ Monitor for pain. If pain persists, checkup required every 3 days.';
+        }
+      }
+      
       setFormData({
         ...formData,
         [name]: type === 'checkbox' ? checked : value,
-        treatmentName: ''
+        treatmentName: '',
+        nextDueDate,
+        setReminder,
+        notes
       });
       setShowAddVaccine(false);
+    } else if (name === 'administeredDate') {
+      // Update withdrawal end date when administered date changes
+      let withdrawalEndDate = formData.withdrawalEndDate;
+      if (formData.treatmentType === 'Antibiotics' && value) {
+        const endDate = new Date(value);
+        endDate.setDate(endDate.getDate() + 21);
+        withdrawalEndDate = endDate.toISOString().split('T')[0];
+      } else if (formData.treatmentType === 'Anti-Inflammatory' && value) {
+        const endDate = new Date(value);
+        endDate.setDate(endDate.getDate() + 7);
+        withdrawalEndDate = endDate.toISOString().split('T')[0];
+      } else if (formData.treatmentType === 'Dewormer' && value) {
+        const endDate = new Date(value);
+        endDate.setDate(endDate.getDate() + 14);
+        withdrawalEndDate = endDate.toISOString().split('T')[0];
+      }
+      
+      setFormData({
+        ...formData,
+        [name]: type === 'checkbox' ? checked : value,
+        withdrawalEndDate
+      });
     } else {
       setFormData({
         ...formData,
@@ -244,6 +303,17 @@ export default function Vaccination() {
 
   // Get available vaccines based on selected treatment type
   const availableVaccines = formData.treatmentType ? treatmentVaccines[formData.treatmentType as keyof typeof treatmentVaccines] || [] : [];
+
+  // Auto-open modal and pre-fill livestock ID if coming from livestock profile
+  React.useEffect(() => {
+    if (livestockIdFromUrl) {
+      setIsModalOpen(true);
+      setFormData(prev => ({
+        ...prev,
+        livestockId: livestockIdFromUrl
+      }));
+    }
+  }, [livestockIdFromUrl]);
 
   const handleBatchToggle = () => {
     setIsBatchMode(!isBatchMode);
@@ -460,13 +530,25 @@ export default function Vaccination() {
               {filteredRecords.map((record) => {
                 const isExpanded = expandedRecords.includes(record.vaccinationId);
                 
+                const getTreatmentColor = (type: string) => {
+                  switch(type) {
+                    case 'Vaccine': return { bg: 'bg-blue-50', border: 'border-blue-200', badge: 'bg-blue-200 text-blue-900' };
+                    case 'Antibiotics': return { bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-200 text-red-900' };
+                    case 'Dewormer': return { bg: 'bg-amber-50', border: 'border-amber-200', badge: 'bg-amber-200 text-amber-900' };
+                    case 'Vitamins': return { bg: 'bg-emerald-50', border: 'border-emerald-200', badge: 'bg-emerald-200 text-emerald-900' };
+                    case 'Anti-Inflammatory': return { bg: 'bg-purple-50', border: 'border-purple-200', badge: 'bg-purple-200 text-purple-900' };
+                    default: return { bg: 'bg-slate-50', border: 'border-slate-200', badge: 'bg-slate-200 text-slate-900' };
+                  }
+                };
+                const colors = getTreatmentColor(record.treatmentType);
+                
                 return (
                   <div
                     key={record.vaccinationId}
-                    className="hover:bg-slate-50 transition-colors"
+                    className={`border-l-4 ${colors.border} transition-colors`}
                   >
                     <div 
-                      className="p-5 cursor-pointer"
+                      className={`p-5 cursor-pointer hover:${colors.bg} transition-colors`}
                       onClick={() => toggleRecord(record.vaccinationId)}
                     >
                       <div className="flex items-start justify-between mb-3">
@@ -500,8 +582,14 @@ export default function Vaccination() {
                               <Syringe size={14} className="mr-1" />
                               <span className="font-medium">{record.treatmentName}</span>
                             </div>
-                            <div className="flex items-center text-slate-500">
-                              <span className="text-xs px-2 py-0.5 bg-slate-100 rounded">{record.treatmentType}</span>
+                            <div className="flex items-center">
+                              <span className={`text-xs px-2 py-0.5 rounded font-semibold ${colors.badge}`}>
+                                {record.treatmentType === 'Vaccine' && 'VACCINE'}
+                                {record.treatmentType === 'Antibiotics' && 'ANTIBIOTIC'}
+                                {record.treatmentType === 'Dewormer' && 'DEWORMER'}
+                                {record.treatmentType === 'Vitamins' && 'VITAMIN'}
+                                {record.treatmentType === 'Anti-Inflammatory' && 'ANTI-INFLAMMATORY'}
+                              </span>
                             </div>
                             <div className="flex items-center text-slate-500">
                               <Calendar size={14} className="mr-1" />
@@ -903,54 +991,97 @@ export default function Vaccination() {
                 </div>
               </div>
 
-              {/* Withdrawal Period Alert */}
-              {(formData.treatmentType === 'Antibiotics' || 
-                formData.treatmentType === 'Anti-Inflammatory' || 
-                formData.treatmentType === 'Dewormer') && (
-                <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              {/* Treatment Scheduling Info */}
+              {formData.treatmentType && (
+                <div className={`mb-6 p-4 rounded-lg border ${
+                  formData.treatmentType === 'Vitamins' ? 'bg-emerald-50 border-emerald-200' :
+                  formData.treatmentType === 'Dewormer' ? 'bg-amber-50 border-amber-200' :
+                  (formData.treatmentType === 'Antibiotics' || formData.treatmentType === 'Anti-Inflammatory') ? 'bg-orange-50 border-orange-200' :
+                  'bg-blue-50 border-blue-200'
+                }`}>
                   <div className="flex items-start space-x-2">
-                    <AlertCircle size={20} className="text-orange-600 mt-0.5" />
+                    <AlertCircle size={20} className={`mt-0.5 ${
+                      formData.treatmentType === 'Vitamins' ? 'text-emerald-600' :
+                      formData.treatmentType === 'Dewormer' ? 'text-amber-600' :
+                      (formData.treatmentType === 'Antibiotics' || formData.treatmentType === 'Anti-Inflammatory') ? 'text-orange-600' :
+                      'text-blue-600'
+                    }`} />
                     <div className="flex-1">
-                      <h4 className="text-sm font-semibold text-orange-900 mb-1">
-                        Withdrawal Period Alert
-                      </h4>
-                      <p className="text-sm text-orange-800 mb-2">
-                        This treatment requires a <strong>{withdrawalPeriods[formData.treatmentType as keyof typeof withdrawalPeriods]} day withdrawal period</strong>.
-                      </p>
-                      <p className="text-xs text-orange-700">
-                        Animals cannot be sold, consumed, or processed until the withdrawal period ends. 
-                        The system will automatically lock the animal for sale/consumption and send alerts.
-                      </p>
-                      {formData.administeredDate && (
-                        <div className="mt-3 p-2 bg-white border border-orange-200 rounded text-xs">
-                          <strong>Withdrawal End Date:</strong>{' '}
-                          {new Date(
-                            new Date(formData.administeredDate).getTime() + 
-                            withdrawalPeriods[formData.treatmentType as keyof typeof withdrawalPeriods] * 24 * 60 * 60 * 1000
-                          ).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                        </div>
+                      {formData.treatmentType === 'Vitamins' && (
+                        <>
+                          <h4 className="text-sm font-semibold text-emerald-900 mb-1">Automatic Scheduling Enabled</h4>
+                          <p className="text-sm text-emerald-800 mb-1">
+                            <strong>Vitamins are scheduled every 2 weeks</strong> for routine supplementation.
+                          </p>
+                          <p className="text-xs text-emerald-700">
+                            Next due date has been automatically set. A reminder will be created 7 days before.
+                          </p>
+                        </>
+                      )}
+                      {formData.treatmentType === 'Dewormer' && (
+                        <>
+                          <h4 className="text-sm font-semibold text-amber-900 mb-1">Automatic Scheduling Enabled</h4>
+                          <p className="text-sm text-amber-800 mb-1">
+                            <strong>Deworming is scheduled every 3-6 months</strong> (default: 3 months).
+                          </p>
+                          <p className="text-xs text-amber-700">
+                            You can adjust the next due date below. A reminder will be created 14 days before.
+                          </p>
+                          {formData.administeredDate && (
+                            <div className="mt-3 p-2 bg-white border border-amber-200 rounded text-xs">
+                              <strong>⚠️ Withdrawal Period:</strong> 14 days - Cannot be sold/consumed until{' '}
+                              {new Date(
+                                new Date(formData.administeredDate).getTime() + 14 * 24 * 60 * 60 * 1000
+                              ).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {formData.treatmentType === 'Antibiotics' && (
+                        <>
+                          <h4 className="text-sm font-semibold text-orange-900 mb-1">⚠️ AMR Treatment Protocol</h4>
+                          <p className="text-sm text-orange-800 mb-2">
+                            <strong>21-day withdrawal period required.</strong> Animal status will be changed to "Sick".
+                          </p>
+                          <ul className="text-xs text-orange-700 space-y-1 list-disc ml-4">
+                            <li>Checkup required every 3 days if symptoms persist</li>
+                            <li>If not recovered, treatment may be re-administered</li>
+                            <li>Cannot be sold/consumed during withdrawal period</li>
+                            <li>No automatic scheduling - only administer when animal is sick</li>
+                          </ul>
+                          {formData.administeredDate && (
+                            <div className="mt-3 p-2 bg-white border border-orange-200 rounded text-xs">
+                              <strong>🔒 Withdrawal End Date:</strong>{' '}
+                              {new Date(
+                                new Date(formData.administeredDate).getTime() + 21 * 24 * 60 * 60 * 1000
+                              ).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {formData.treatmentType === 'Anti-Inflammatory' && (
+                        <>
+                          <h4 className="text-sm font-semibold text-orange-900 mb-1">⚠️ Pain Management Protocol</h4>
+                          <p className="text-sm text-orange-800 mb-2">
+                            <strong>7-day withdrawal period required.</strong>
+                          </p>
+                          <ul className="text-xs text-orange-700 space-y-1 list-disc ml-4">
+                            <li>Monitor for pain relief - if pain persists, checkup every 3 days</li>
+                            <li>If no improvement, may need to re-administer</li>
+                            <li>Cannot be sold/consumed during withdrawal period</li>
+                            <li>Only administer when animal shows pain/inflammation</li>
+                          </ul>
+                          {formData.administeredDate && (
+                            <div className="mt-3 p-2 bg-white border border-orange-200 rounded text-xs">
+                              <strong>🔒 Withdrawal End Date:</strong>{' '}
+                              {new Date(
+                                new Date(formData.administeredDate).getTime() + 7 * 24 * 60 * 60 * 1000
+                              ).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
-                  </div>
-                  
-                  {/* Withdrawal End Date Input (calculated automatically but can be overridden) */}
-                  <div className="mt-3">
-                    <label className="block text-sm font-medium text-orange-900 mb-1">
-                      Withdrawal End Date
-                    </label>
-                    <input
-                      type="date"
-                      name="withdrawalEndDate"
-                      value={formData.withdrawalEndDate || (
-                        formData.administeredDate ? 
-                        new Date(
-                          new Date(formData.administeredDate).getTime() + 
-                          withdrawalPeriods[formData.treatmentType as keyof typeof withdrawalPeriods] * 24 * 60 * 60 * 1000
-                        ).toISOString().split('T')[0] : ''
-                      )}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-orange-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
-                    />
                   </div>
                 </div>
               )}

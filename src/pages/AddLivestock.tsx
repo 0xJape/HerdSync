@@ -14,6 +14,7 @@ export default function AddLivestock() {
   const [isNewborn, setIsNewborn] = React.useState(false);
   const [hasBred, setHasBred] = React.useState(false);
   const [calculatedCategory, setCalculatedCategory] = React.useState<string>('');
+  const [showParentDetails, setShowParentDetails] = React.useState(true); // Toggle for parent details
   
   // Breed data - Common Philippine breeds organized by species
   const [breedsBySpecies, setBreedsBySpecies] = React.useState({
@@ -66,7 +67,10 @@ export default function AddLivestock() {
     // Newborn-specific health assessment
     birthComplications: '',
     newbornBodyConditionScore: '',
-    newbornHealthAssessment: ''
+    newbornHealthAssessment: '',
+    // Vaccination History
+    previousVaccines: '', // Vaccines from previous owner
+    treatmentVaccines: '' // Vaccines given during treatment if sick
   });
 
   // Auto-calculate category when species, gender, birthdate, or hasBred changes
@@ -374,12 +378,24 @@ export default function AddLivestock() {
               <div className="md:col-span-2 space-y-6">
                 {/* Parents Section */}
                 <div className="bg-blue-50 rounded-lg p-5 border border-blue-200">
-                  <h3 className="text-sm font-semibold text-blue-900 mb-3 flex items-center">
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    Parent Information
-                  </h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-blue-900 flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Parent Information
+                    </h3>
+                    <label className="flex items-center space-x-2 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-blue-300">
+                      <input
+                        type="checkbox"
+                        checked={showParentDetails}
+                        onChange={(e) => setShowParentDetails(e.target.checked)}
+                        className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-xs font-medium text-blue-900">Show Details</span>
+                    </label>
+                  </div>
+                  {showParentDetails ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Dam (Mother) Selection */}
                 <div>
@@ -446,6 +462,11 @@ export default function AddLivestock() {
                   <p className="text-xs text-slate-500 mt-1">Select the birth date (defaults to today)</p>
                 </div>
               </div>
+            ) : (
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-700">Parent details hidden. Toggle "Show Details" above to enter mother and father information.</p>
+              </div>
+            )}
             </div>
 
             {/* Newborn Health Assessment */}
@@ -770,6 +791,49 @@ export default function AddLivestock() {
               Check the box above if this animal was purchased from an external seller
             </p>
           )}
+        </div>
+      </div>
+
+      {/* Section 1.6: Vaccination History */}
+      <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+        <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
+          <h2 className="text-lg font-semibold text-slate-900">Vaccination History</h2>
+          <p className="text-xs text-slate-600 mt-0.5">Record any vaccines administered before or during treatment</p>
+        </div>
+        <div className="p-6">
+          <div className="space-y-4">
+            {isPurchased && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Vaccines from Previous Owner
+                </label>
+                <textarea
+                  name="previousVaccines"
+                  value={formData.previousVaccines}
+                  onChange={handleInputChange}
+                  rows={3}
+                  placeholder="List vaccines administered by previous owner (e.g., FMD vaccine - Jan 2025, Anthrax vaccine - Dec 2024)..."
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+                <p className="text-xs text-slate-500 mt-1">Include vaccine name, date administered, and any additional notes</p>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Treatment Vaccines (If Sick)
+              </label>
+              <textarea
+                name="treatmentVaccines"
+                value={formData.treatmentVaccines}
+                onChange={handleInputChange}
+                rows={3}
+                placeholder="List vaccines administered during treatment (e.g., Hemorrhagic Septicemia vaccine - Nov 2025, Antibiotic treatment - Nov 2025)..."
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+              <p className="text-xs text-slate-500 mt-1">Include vaccine/medication name, date administered, dosage, and treatment outcome</p>
+            </div>
+          </div>
         </div>
       </div>
 
