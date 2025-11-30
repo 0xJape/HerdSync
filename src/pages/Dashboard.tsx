@@ -15,10 +15,12 @@ import {
   Activity,
   Clock,
   User,
+  Eye,
   type LucideIcon, 
   FileExclamationPoint, 
   AlertOctagon
 } from 'lucide-react';
+import { useStore } from '../store/useStore';
 
 interface StatCardProps {
   title: string;
@@ -219,6 +221,9 @@ function ActivityLogItem({ action, description, user, timestamp, entityType, ent
 }
 
 export default function Dashboard() {
+  const { userRole } = useStore();
+  const isViewer = userRole === 'viewer';
+  
   const [tasks, setTasks] = React.useState([
     { id: 1, task: 'Vaccinate 12 calves', dueDate: 'Nov 21', completed: false, priority: 'high' as const },
     { id: 2, task: 'Health checkup: Herd B', dueDate: 'Nov 22', completed: false, priority: 'medium' as const },
@@ -227,6 +232,7 @@ export default function Dashboard() {
   ]);
 
   const toggleTask = (id: number) => {
+    if (isViewer) return; // Viewers can't modify tasks
     setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
   };
 
@@ -299,6 +305,23 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-5">
+      {/* View-Only Mode Banner */}
+      {isViewer && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0">
+              <Eye className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-blue-900">View-Only Mode</h3>
+              <p className="text-xs text-blue-700 mt-0.5">
+                You are logged in as a viewer. You can view all data but cannot make any modifications.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard

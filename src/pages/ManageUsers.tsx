@@ -298,13 +298,15 @@ export default function ManageUsers() {
                         >
                           <Edit2 size={16} />
                         </button>
-                        <button
-                          onClick={() => openDeleteModal(user)}
-                          className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
-                          title="Delete user"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        {user.role !== 'Admin' && (
+                          <button
+                            onClick={() => openDeleteModal(user)}
+                            className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
+                            title="Delete user"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

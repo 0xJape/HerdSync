@@ -55,7 +55,10 @@ const mockBreedingData = {
         sireName: 'Angus Bull',
         breedingMethod: 'Natural Breeding',
         currentDay: 180,
-        gestationDays: 283
+        gestationDays: 283,
+        lastCheckupDate: '2024-11-15',
+        nextCheckupDate: '2024-12-15',
+        checkupInterval: 30
       },
       {
         id: 2,
@@ -133,7 +136,15 @@ export default function Breeding() {
           </Link>
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">Breeding Records</h1>
-            <p className="text-sm text-slate-600 mt-1">Livestock ID: {id}</p>
+            <div className="flex items-center space-x-2 mt-1">
+              <p className="text-sm text-slate-600">Dam (Mother):</p>
+              <Link 
+                to={`/livestock/${id}`}
+                className="text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline"
+              >
+                {id}
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -203,7 +214,12 @@ export default function Breeding() {
             </div>
             <div>
               <p className="text-xs font-medium text-slate-500 mb-1">Sire</p>
-              <p className="text-sm text-slate-900">{breedingData.currentPregnancy.sireId} - {breedingData.currentPregnancy.sireName}</p>
+              <Link 
+                to={`/livestock/${breedingData.currentPregnancy.sireId}`}
+                className="text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline"
+              >
+                {breedingData.currentPregnancy.sireId} - {breedingData.currentPregnancy.sireName}
+              </Link>
             </div>
             <div>
               <p className="text-xs font-medium text-slate-500 mb-1">Breeding Method</p>
@@ -237,21 +253,24 @@ export default function Breeding() {
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="flex items-center space-x-3">
-        <button className="flex items-center space-x-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
-          <Plus size={16} />
-          <span>New Breeding Record</span>
-        </button>
-        <button className="flex items-center space-x-2 px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg transition-colors">
-          <Activity size={16} />
-          <span>Pregnancy Check</span>
-        </button>
-        <button className="flex items-center space-x-2 px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg transition-colors">
-          <Baby size={16} />
-          <span>Record Birth</span>
-        </button>
-      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <div className="xl:col-span-2 space-y-6">
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-3">
+            <button className="flex items-center space-x-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+              <Plus size={16} />
+              <span>New Breeding Record</span>
+            </button>
+            <button className="flex items-center space-x-2 px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg transition-colors">
+              <Activity size={16} />
+              <span>Pregnancy Check</span>
+            </button>
+            <button className="flex items-center space-x-2 px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg transition-colors">
+              <Baby size={16} />
+              <span>Record Birth</span>
+            </button>
+          </div>
 
       {/* Breeding History */}
       <div className="bg-white rounded-lg border border-slate-200 p-6">
@@ -272,13 +291,21 @@ export default function Breeding() {
                   <h4 className="font-semibold text-slate-900 mb-1">
                     Pregnancy #{pregnancy.id} {pregnancy.status === 'Pregnant' && '(Current)'}
                   </h4>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                    pregnancy.status === 'Successful' 
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-pink-100 text-pink-700'
-                  }`}>
-                    {pregnancy.status === 'Successful' ? '✅ Successful Birth' : '🤰 Pregnant'}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                      pregnancy.status === 'Successful' 
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-pink-100 text-pink-700'
+                    }`}>
+                      {pregnancy.status === 'Successful' ? '✅ Successful Birth' : '🤰 Pregnant'}
+                    </span>
+                    {pregnancy.status === 'Pregnant' && pregnancy.nextCheckupDate && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                        <Calendar size={10} className="mr-1" />
+                        Next Check: {new Date(pregnancy.nextCheckupDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {pregnancy.status === 'Pregnant' && (
                   <span className="text-sm font-medium text-pink-600">
@@ -303,7 +330,12 @@ export default function Breeding() {
                 </div>
                 <div>
                   <p className="text-xs text-slate-500 mb-0.5">Sire</p>
-                  <p className="font-medium text-slate-900">{pregnancy.sireId}</p>
+                  <Link 
+                    to={`/livestock/${pregnancy.sireId}`}
+                    className="font-medium text-primary-600 hover:text-primary-700 hover:underline"
+                  >
+                    {pregnancy.sireId}
+                  </Link>
                 </div>
                 <div>
                   <p className="text-xs text-slate-500 mb-0.5">Method</p>
@@ -311,12 +343,36 @@ export default function Breeding() {
                 </div>
               </div>
 
+              {pregnancy.status === 'Pregnant' && pregnancy.lastCheckupDate && (
+                <div className="mt-3 pt-3 border-t border-pink-200">
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-xs text-slate-500 mb-0.5">Last Checkup</p>
+                      <p className="font-medium text-slate-900">{new Date(pregnancy.lastCheckupDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 mb-0.5">Next Checkup Due</p>
+                      <p className="font-semibold text-blue-600">{new Date(pregnancy.nextCheckupDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">
+                    Checkup scheduled every {pregnancy.checkupInterval} days during pregnancy
+                  </p>
+                </div>
+              )}
+
               {pregnancy.status === 'Successful' && (
                 <div className="mt-3 pt-3 border-t border-slate-200">
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+                  <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-sm mb-3">
+                    <div>
+                      <p className="text-xs text-slate-500 mb-0.5">Dam (Mother)</p>
+                      <Link to={`/livestock/${id}`} className="font-medium text-primary-600 hover:text-primary-700 hover:underline">
+                        {id}
+                      </Link>
+                    </div>
                     <div>
                       <p className="text-xs text-slate-500 mb-0.5">Offspring ID</p>
-                      <Link to={`/livestock/${pregnancy.offspringId}`} className="font-medium text-primary-600 hover:text-primary-700">
+                      <Link to={`/livestock/${pregnancy.offspringId}`} className="font-medium text-primary-600 hover:text-primary-700 hover:underline">
                         {pregnancy.offspringId}
                       </Link>
                     </div>
@@ -360,9 +416,9 @@ export default function Breeding() {
         </div>
       </div>
 
-      {/* Breeding Performance Metrics */}
-      <div className="bg-white rounded-lg border border-slate-200 p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Breeding Performance</h3>
+          {/* Breeding Performance Metrics */}
+          <div className="bg-white rounded-lg border border-slate-200 p-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">Breeding Performance</h3>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-emerald-50 rounded-lg p-4">
@@ -395,6 +451,103 @@ export default function Breeding() {
               <p className="text-xs font-medium text-amber-900">Avg Birth Weight</p>
             </div>
             <p className="text-2xl font-bold text-amber-600">43.5 kg</p>
+          </div>
+        </div>
+          </div>
+        </div>
+
+        {/* Quick Actions Sidebar */}
+        <div className="xl:col-span-1 space-y-4">
+          {/* Dam (Current Animal) Details */}
+          <div className="bg-white rounded-lg border border-slate-200">
+            <div className="px-4 py-3 bg-purple-50 border-b border-purple-200">
+              <h3 className="text-sm font-semibold text-purple-900">Dam (Mother)</h3>
+            </div>
+            <div className="p-4">
+              <Link 
+                to={`/livestock/${id}`}
+                className="text-lg font-bold text-primary-600 hover:text-primary-700 hover:underline block mb-2"
+              >
+                {id}
+              </Link>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Status:</span>
+                  <span className="font-semibold text-slate-900">{breedingData.currentStatus}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Pregnancies:</span>
+                  <span className="font-semibold text-slate-900">{breedingData.totalPregnancies}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Live Offspring:</span>
+                  <span className="font-semibold text-slate-900">{breedingData.liveOffspring}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Success Rate:</span>
+                  <span className="font-semibold text-emerald-600">{breedingData.conceptionRate}%</span>
+                </div>
+              </div>
+              <Link 
+                to={`/livestock/${id}`}
+                className="mt-4 w-full px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center"
+              >
+                View Full Profile
+              </Link>
+            </div>
+          </div>
+
+          {/* Current Sire Details */}
+          {breedingData.currentPregnancy && (
+            <div className="bg-white rounded-lg border border-slate-200">
+              <div className="px-4 py-3 bg-blue-50 border-b border-blue-200">
+                <h3 className="text-sm font-semibold text-blue-900">Current Sire</h3>
+              </div>
+              <div className="p-4">
+                <Link 
+                  to={`/livestock/${breedingData.currentPregnancy.sireId}`}
+                  className="text-lg font-bold text-primary-600 hover:text-primary-700 hover:underline block mb-1"
+                >
+                  {breedingData.currentPregnancy.sireId}
+                </Link>
+                <p className="text-sm text-slate-600 mb-3">{breedingData.currentPregnancy.sireName}</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Method:</span>
+                    <span className="font-semibold text-slate-900">{breedingData.currentPregnancy.breedingMethod}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Conception:</span>
+                    <span className="font-semibold text-slate-900">
+                      {new Date(breedingData.currentPregnancy.conceptionDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Day:</span>
+                    <span className="font-semibold text-pink-600">
+                      {breedingData.daysPregnant}/{breedingData.totalGestationDays}
+                    </span>
+                  </div>
+                </div>
+                <Link 
+                  to={`/livestock/${breedingData.currentPregnancy.sireId}`}
+                  className="mt-4 w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center"
+                >
+                  View Sire Profile
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Breeding Tips */}
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg border border-amber-200 p-4">
+            <h3 className="text-sm font-semibold text-amber-900 mb-2">Breeding Tips</h3>
+            <ul className="space-y-1 text-xs text-amber-800">
+              <li>• Monitor body condition score</li>
+              <li>• Regular pregnancy checks</li>
+              <li>• Proper nutrition during gestation</li>
+              <li>• Prepare calving area 2 weeks before</li>
+            </ul>
           </div>
         </div>
       </div>

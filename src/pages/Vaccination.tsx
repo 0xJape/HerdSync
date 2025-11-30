@@ -10,8 +10,10 @@ import {
   CheckCircle,
   Clock,
   X,
-  ChevronDown
+  ChevronDown,
+  Eye
 } from 'lucide-react';
+import { useStore } from '../store/useStore';
 
 // Mock data for health records - based on ERD schema
 const vaccinationRecords = [
@@ -152,6 +154,9 @@ const upcomingVaccinations = [
 ];
 
 export default function Vaccination() {
+  const { userRole } = useStore();
+  const isViewer = userRole === 'viewer';
+  
   const [searchParams] = useSearchParams();
   const livestockIdFromUrl = searchParams.get('livestockId');
   
@@ -509,15 +514,27 @@ export default function Vaccination() {
             </select>
           </div>
 
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
-          >
-            <Plus size={18} className="mr-2" />
-            Record Treatment
-          </button>
+          {!isViewer && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
+            >
+              <Plus size={18} className="mr-2" />
+              Record Treatment
+            </button>
+          )}
         </div>
       </div>
+
+      {/* View-Only Banner for Viewers */}
+      {isViewer && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center space-x-2">
+            <Eye className="w-4 h-4 text-blue-600" />
+            <p className="text-xs font-medium text-blue-900">View-Only Mode - You can view health records but cannot add or modify treatments</p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Vaccination Records */}

@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
+import { useStore } from '../store/useStore';
+
 export default function Login() {
   const navigate = useNavigate();
+  const { setUserRole } = useStore();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -13,7 +16,19 @@ export default function Login() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Since this is UI only, just navigate to dashboard
+    
+    // Detect user role based on email
+    const email = formData.email.toLowerCase();
+    
+    if (email === 'viewer@digifarm.com') {
+      setUserRole('viewer', email);
+    } else if (email.includes('manager')) {
+      setUserRole('manager', email);
+    } else {
+      setUserRole('admin', email);
+    }
+    
+    // Navigate to dashboard
     navigate('/dashboard');
   };
 
@@ -160,8 +175,44 @@ export default function Login() {
           </form>
         </div>
 
+        {/* Quick Login Options */}
+        <div className="mt-6 space-y-3">
+          <p className="text-center text-xs font-medium text-slate-500 uppercase tracking-wide">
+            Quick Login
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setFormData({ ...formData, email: 'admin@digifarm.com', password: 'admin123' });
+              }}
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 transition-colors"
+            >
+              👨‍💼 Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setFormData({ ...formData, email: 'manager@digifarm.com', password: 'manager123' });
+              }}
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 transition-colors"
+            >
+              👔 Manager
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setFormData({ ...formData, email: 'viewer@digifarm.com', password: 'viewer123' });
+              }}
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 transition-colors"
+            >
+              👁️ Viewer
+            </button>
+          </div>
+        </div>
+
         {/* Admin Note */}
-        <p className="text-center mt-6 text-sm text-slate-500">
+        <p className="text-center mt-4 text-sm text-slate-500">
           Don't have an account? Contact your administrator for access.
         </p>
       </div>

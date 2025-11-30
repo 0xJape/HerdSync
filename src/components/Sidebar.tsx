@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Beef, 
   Syringe, 
   Heart, 
-  Activity, 
   FileText,
   Users,
   Baby,
+  LogOut,
   type LucideIcon
 } from 'lucide-react';
+import { useStore } from '../store/useStore';
 
 interface NavItem {
   name: string;
@@ -29,11 +30,10 @@ const navSections: NavSection[] = [
     title: '',
     items: [
       { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-      { name: 'Livestock', path: '/livestock', icon: Beef, badge: 67 },
+      { name: 'Livestock', path: '/livestock', icon: Beef, badge: 71 },
       { name: 'Health', path: '/vaccination', icon: Syringe, badge: 12 },
       { name: 'Breeding', path: '/breeding', icon: Heart },
       { name: 'Pregnancy', path: '/pregnancy', icon: Baby, badge: 1 },
-      { name: 'Activity', path: '/activity', icon: Activity },
       { name: 'Reports', path: '/reports', icon: FileText },
     ],
   },
@@ -47,9 +47,16 @@ const navSections: NavSection[] = [
 
 export default function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { clearUser, userRole } = useStore();
   const [collapsed, setCollapsed] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
+  
+  const handleLogout = () => {
+    clearUser();
+    navigate('/login');
+  };
 
   return (
     <aside
@@ -110,6 +117,19 @@ export default function Sidebar() {
             )}
             <ul className="space-y-0.5">
               {section.items.map((item) => {
+                // Hide Manage Users for managers and viewers
+                if (item.path === '/manage-users' && (userRole === 'manager' || userRole === 'viewer')) {
+                  return null;
+                }
+                
+                // For viewers, only show Dashboard, Livestock, and Reports
+                if (userRole === 'viewer' && 
+                    item.path !== '/dashboard' && 
+                    item.path !== '/livestock' && 
+                    item.path !== '/reports') {
+                  return null;
+                }
+                
                 const active = isActive(item.path);
                 const IconComponent = item.icon;
                 return (
@@ -159,20 +179,33 @@ export default function Sidebar() {
       {/* User Profile */}
       <div className={`border-t border-slate-200 p-3 ${collapsed ? 'px-2' : ''}`}>
         {!collapsed ? (
-          <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-primary-50 transition-colors cursor-pointer group">
-            <img 
-              src="/images/main_logo.png" 
-              alt="User Avatar" 
-              className="w-10 h-10 rounded-lg object-contain"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-900 truncate">Doc Alexis</p>
-              <p className="text-xs text-slate-500 truncate">Veterinarian</p>
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-primary-50 transition-colors cursor-pointer group">
+              <img 
+                src="/images/main_logo.png" 
+                alt="User Avatar" 
+                className="w-10 h-10 rounded-lg object-contain"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-900 truncate">Doc Alexis</p>
+                <p className="text-xs text-slate-500 truncate">Veterinarian</p>
+              </div>
             </div>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center space-x-2 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors group"
+            >
+              <LogOut size={16} />
+              <span>Logout</span>
+            </button>
           </div>
         ) : (
-          <button className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white text-xs font-semibold mx-auto hover:bg-primary-600 transition-colors">
-            JD
+          <button
+            onClick={handleLogout}
+            className="flex items-center justify-center w-8 h-8 text-red-600 hover:bg-red-50 rounded-lg transition-colors mx-auto"
+            title="Logout"
+          >
+            <LogOut size={16} />
           </button>
         )}
       </div>

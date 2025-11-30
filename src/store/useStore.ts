@@ -53,12 +53,18 @@ interface Livestock {
 interface StoreState {
   farms: Farm[];
   livestock: Livestock[];
+  userRole: 'admin' | 'manager' | 'viewer' | null;
+  userEmail: string | null;
   addFarm: (farm: Farm) => void;
   addLivestock: (livestock: Livestock) => void;
+  setUserRole: (role: 'admin' | 'manager' | 'viewer', email: string) => void;
+  clearUser: () => void;
 }
 
 export const useStore = create<StoreState>((set) => ({
   farms: [],
+  userRole: (localStorage.getItem('userRole') as 'admin' | 'manager' | 'viewer' | null) || null,
+  userEmail: localStorage.getItem('userEmail') || null,
   livestock: [
     // Sample Cattle
     {
@@ -228,4 +234,14 @@ export const useStore = create<StoreState>((set) => ({
   ],
   addFarm: (farm) => set((state) => ({ farms: [...state.farms, farm] })),
   addLivestock: (livestock) => set((state) => ({ livestock: [...state.livestock, livestock] })),
+  setUserRole: (role, email) => {
+    localStorage.setItem('userRole', role);
+    localStorage.setItem('userEmail', email);
+    set({ userRole: role, userEmail: email });
+  },
+  clearUser: () => {
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userEmail');
+    set({ userRole: null, userEmail: null });
+  },
 }));

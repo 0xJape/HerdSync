@@ -794,48 +794,50 @@ export default function AddLivestock() {
         </div>
       </div>
 
-      {/* Section 1.6: Vaccination History */}
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
-        <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
-          <h2 className="text-lg font-semibold text-slate-900">Vaccination History</h2>
-          <p className="text-xs text-slate-600 mt-0.5">Record any vaccines administered before or during treatment</p>
-        </div>
-        <div className="p-6">
-          <div className="space-y-4">
-            {isPurchased && (
+      {/* Section 1.6: Vaccination History - Hidden for newborns */}
+      {!isNewborn && (
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
+          <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
+            <h2 className="text-lg font-semibold text-slate-900">Vaccination History</h2>
+            <p className="text-xs text-slate-600 mt-0.5">Record any vaccines administered before or during treatment</p>
+          </div>
+          <div className="p-6">
+            <div className="space-y-4">
+              {isPurchased && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Vaccines from Previous Owner
+                  </label>
+                  <textarea
+                    name="previousVaccines"
+                    value={formData.previousVaccines}
+                    onChange={handleInputChange}
+                    rows={3}
+                    placeholder="List vaccines administered by previous owner (e.g., FMD vaccine - Jan 2025, Anthrax vaccine - Dec 2024)..."
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Include vaccine name, date administered, and any additional notes</p>
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Vaccines from Previous Owner
+                  Treatment Vaccines (If Sick)
                 </label>
                 <textarea
-                  name="previousVaccines"
-                  value={formData.previousVaccines}
+                  name="treatmentVaccines"
+                  value={formData.treatmentVaccines}
                   onChange={handleInputChange}
                   rows={3}
-                  placeholder="List vaccines administered by previous owner (e.g., FMD vaccine - Jan 2025, Anthrax vaccine - Dec 2024)..."
+                  placeholder="List vaccines administered during treatment (e.g., Hemorrhagic Septicemia vaccine - Nov 2025, Antibiotic treatment - Nov 2025)..."
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
-                <p className="text-xs text-slate-500 mt-1">Include vaccine name, date administered, and any additional notes</p>
+                <p className="text-xs text-slate-500 mt-1">Include vaccine/medication name, date administered, dosage, and treatment outcome</p>
               </div>
-            )}
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Treatment Vaccines (If Sick)
-              </label>
-              <textarea
-                name="treatmentVaccines"
-                value={formData.treatmentVaccines}
-                onChange={handleInputChange}
-                rows={3}
-                placeholder="List vaccines administered during treatment (e.g., Hemorrhagic Septicemia vaccine - Nov 2025, Antibiotic treatment - Nov 2025)..."
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              />
-              <p className="text-xs text-slate-500 mt-1">Include vaccine/medication name, date administered, dosage, and treatment outcome</p>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Physical Assessment (applicable for all animals) - Hidden for newborns */}
       {!isNewborn && (

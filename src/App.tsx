@@ -14,6 +14,7 @@ import Vaccination from './pages/Vaccination';
 import Reports from './pages/Reports';
 import ManageUsers from './pages/ManageUsers';
 import Pregnancy from './pages/Pregnancy';
+import PregnancyDetail from './pages/PregnancyDetail';
 import Sidebar from './components/Sidebar';
 
 export default function App() {
@@ -78,6 +79,7 @@ export default function App() {
             <Route path="/breeding" element={<BreedingOverview />} />
             <Route path="/breeding/:id" element={<BreedingRecordDetail />} />
             <Route path="/pregnancy" element={<Pregnancy />} />
+            <Route path="/pregnancy/:id" element={<PregnancyDetail />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/manage-users" element={<ManageUsers />} />
           </Routes>
@@ -97,6 +99,9 @@ function getPageTitle(pathname: string): string {
   }
   if (pathname.startsWith('/breeding/') && pathname !== '/breeding') {
     return 'Breeding Record Details';
+  }
+  if (pathname.startsWith('/pregnancy/') && pathname !== '/pregnancy') {
+    return 'Pregnancy Details';
   }
   
   const titles: Record<string, string> = {

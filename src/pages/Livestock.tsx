@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Plus, Beef, Filter, AlertCircle, CheckCircle, AlertTriangle, X } from 'lucide-react';
+import { Search, Plus, Beef, Filter, AlertCircle, CheckCircle, AlertTriangle, X, Eye } from 'lucide-react';
+import { useStore } from '../store/useStore';
 
 interface LivestockItem {
   id: string;
@@ -30,13 +31,23 @@ const mockLivestock: LivestockItem[] = [
   { id: 'S-001', tag: 'S-001', species: 'Sheep', breed: 'Barbados Blackbelly', category: 'Ram', sex: 'Male', age: '4y 0m', status: 'Healthy' },
   { id: 'S-005', tag: 'S-005', species: 'Sheep', breed: 'Native/Philippine Native', category: 'Ewe', sex: 'Female', age: '3y 2m', status: 'Sick' },
   { id: 'S-013', tag: 'S-013', species: 'Sheep', breed: 'Crossbreed', category: 'Lamb', sex: 'Male', age: '0y 6m', status: 'Healthy' },
+
+  // Newborn livestock from recent births
+  { id: 'LS-31', tag: 'LS-31', species: 'Cattle', breed: 'Brahman', category: 'Calf', sex: 'Male', age: '0y 0m (10 days)', status: 'Healthy' },
+  { id: 'LS-41', tag: 'LS-41', species: 'Goat', breed: 'Anglo-Nubian x Boer', category: 'Kid', sex: 'Female', age: '0y 0m (5 days)', status: 'Healthy' },
+  { id: 'LS-42', tag: 'LS-42', species: 'Goat', breed: 'Anglo-Nubian x Boer', category: 'Kid', sex: 'Male', age: '0y 0m (5 days)', status: 'Monitor' },
+  { id: 'LS-51', tag: 'LS-51', species: 'Sheep', breed: 'Native x Barbados Blackbelly', category: 'Lamb', sex: 'Female', age: '0y 0m (15 days)', status: 'Monitor' },
 ];
 
 export default function Livestock() {
+  const { userRole } = useStore();
+  const isViewer = userRole === 'viewer';
+  
   const [searchQuery, setSearchQuery] = React.useState('');
   const [statusFilter, setStatusFilter] = React.useState<string>('all');
   const [speciesFilter, setSpeciesFilter] = React.useState<string>('all');
   const [sexFilter, setSexFilter] = React.useState<string>('all');
+  const [categoryFilter, setCategoryFilter] = React.useState<string>('all');
   const [showFilters, setShowFilters] = React.useState(false);
 
   const filteredLivestock = mockLivestock.filter(animal => {
@@ -46,10 +57,15 @@ export default function Livestock() {
     const matchesStatus = statusFilter === 'all' || animal.status.toLowerCase() === statusFilter.toLowerCase();
     const matchesSpecies = speciesFilter === 'all' || animal.species === speciesFilter;
     const matchesSex = sexFilter === 'all' || animal.sex === sexFilter;
-    return matchesSearch && matchesStatus && matchesSpecies && matchesSex;
+    
+    // Category filter for newborns
+    const matchesCategory = categoryFilter === 'all' || 
+      (categoryFilter === 'newborn' && ['Calf', 'Kid', 'Lamb'].includes(animal.category));
+    
+    return matchesSearch && matchesStatus && matchesSpecies && matchesSex && matchesCategory;
   });
 
-  const activeFiltersCount = [statusFilter, speciesFilter, sexFilter].filter(f => f !== 'all').length;
+  const activeFiltersCount = [statusFilter, speciesFilter, sexFilter, categoryFilter].filter(f => f !== 'all').length;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -71,6 +87,16 @@ export default function Livestock() {
 
   return (
     <div className="space-y-4">
+      {/* View-Only Banner for Viewers */}
+      {isViewer && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center space-x-2">
+            <Eye className="w-4 h-4 text-blue-600" />
+            <p className="text-xs font-medium text-blue-900">View-Only Mode - You can view livestock data but cannot add or modify records</p>
+          </div>
+        </div>
+      )}
+      
       {/* Header Actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -105,13 +131,15 @@ export default function Livestock() {
           </button>
         </div>
 
-        <Link
-          to="/livestock/add"
-          className="flex items-center space-x-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          <Plus size={16} />
-          <span>Add Animal</span>
-        </Link>
+        {!isViewer && (
+          <Link
+            to="/livestock/add"
+            className="flex items-center space-x-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors"
+          >
+            <Plus size={16} />
+            <span>Add Animal</span>
+          </Link>
+        )}
       </div>
 
       {/* Advanced Filters Panel */}
@@ -161,6 +189,22 @@ export default function Livestock() {
               </select>
             </div>
 
+            {/* Age/Category Quick Filter */}
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1.5">Category</label>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="all">All Categories</option>
+                <option value="newborn">🍼 Newborn (0-3 months)</option>
+                <option value="young">Young (3-12 months)</option>
+                <option value="breeding">Breeding Age</option>
+                <option value="mature">Mature</option>
+              </select>
+            </div>
+
             {/* Health Status Filter */}
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1.5">Health Status</label>
@@ -186,23 +230,23 @@ export default function Livestock() {
             <p className="text-xs font-medium text-slate-500">Total Animals</p>
             <Beef size={16} className="text-slate-400" />
           </div>
-          <p className="text-2xl font-semibold text-slate-900">67</p>
-          <p className="text-xs text-slate-500 mt-1">25 Cattle, 26 Goats, 16 Sheep</p>
+          <p className="text-2xl font-semibold text-slate-900">71</p>
+          <p className="text-xs text-slate-500 mt-1">26 Cattle, 28 Goats, 17 Sheep</p>
         </div>
         <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs font-medium text-emerald-700">Healthy</p>
             <CheckCircle size={16} className="text-emerald-600" />
           </div>
-          <p className="text-2xl font-semibold text-emerald-900">60</p>
-          <p className="text-xs text-emerald-600 mt-1">90% of herd</p>
+          <p className="text-2xl font-semibold text-emerald-900">62</p>
+          <p className="text-xs text-emerald-600 mt-1">87% of herd</p>
         </div>
         <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs font-medium text-amber-700">Monitor</p>
             <AlertTriangle size={16} className="text-amber-600" />
           </div>
-          <p className="text-2xl font-semibold text-amber-900">6</p>
+          <p className="text-2xl font-semibold text-amber-900">8</p>
           <p className="text-xs text-amber-600 mt-1">Needs attention</p>
         </div>
         <div className="p-4 bg-red-50 rounded-lg border border-red-200">

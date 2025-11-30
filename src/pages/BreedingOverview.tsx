@@ -9,8 +9,11 @@ import {
   User,
   Users,
   Save,
-  AlertCircle
+  AlertCircle,
+  CheckCircle,
+  Eye
 } from 'lucide-react';
+import { useStore } from '../store/useStore';
 
 // Mock data for recent breeding records
 const recentBreedings = [
@@ -190,11 +193,35 @@ const activeSires = [
   }
 ];
 
+// Mock livestock data for selection
+const mockLivestock = [
+  // Females
+  { id: 'C-023', name: 'Brahman Heifer', species: 'Cattle', breed: 'Brahman', sex: 'Female', status: 'Healthy', isOnHeat: true, breedingStatus: 'Open for Breeding', age: '3y 2m' },
+  { id: 'C-015', name: 'Brahman Cow', species: 'Cattle', breed: 'Brahman', sex: 'Female', status: 'Healthy', isOnHeat: false, breedingStatus: 'Not in Heat', age: '5y 1m' },
+  { id: 'C-042', name: 'Holstein Cow', species: 'Cattle', breed: 'Holstein', sex: 'Female', status: 'Sick', isOnHeat: false, breedingStatus: 'Under Treatment', age: '4y 0m' },
+  { id: 'G-019', name: 'Boer Doe', species: 'Goat', breed: 'Boer', sex: 'Female', status: 'Healthy', isOnHeat: true, breedingStatus: 'Open for Breeding', age: '2y 1m' },
+  { id: 'G-008', name: 'Boer Doe 2', species: 'Goat', breed: 'Boer', sex: 'Female', status: 'Healthy', isOnHeat: true, breedingStatus: 'Open for Breeding', age: '2y 6m' },
+  { id: 'S-005', name: 'Dorper Ewe', species: 'Sheep', breed: 'Dorper', sex: 'Female', status: 'Healthy', isOnHeat: false, breedingStatus: 'Not in Heat', age: '3y 0m' },
+  { id: 'S-012', name: 'Dorper Ewe 2', species: 'Sheep', breed: 'Dorper', sex: 'Female', status: 'Healthy', isOnHeat: true, breedingStatus: 'Open for Breeding', age: '2y 8m' },
+  // Males
+  { id: 'B-001', name: 'Brahman Bull', species: 'Cattle', breed: 'Brahman', sex: 'Male', status: 'Healthy', age: '5y 0m' },
+  { id: 'B-002', name: 'Angus Bull', species: 'Cattle', breed: 'Angus', sex: 'Male', status: 'Healthy', age: '6y 1m' },
+  { id: 'B-005', name: 'Brahman Bull 2', species: 'Cattle', breed: 'Brahman', sex: 'Male', status: 'Sick', age: '4y 6m' },
+  { id: 'G-001', name: 'Boer Buck', species: 'Goat', breed: 'Boer', sex: 'Male', status: 'Healthy', age: '3y 2m' },
+  { id: 'S-001', name: 'Dorper Ram', species: 'Sheep', breed: 'Dorper', sex: 'Male', status: 'Healthy', age: '4y 1m' },
+];
+
 export default function BreedingOverview() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [speciesFilter, setSpeciesFilter] = React.useState<'all' | 'cattle' | 'goat' | 'sheep'>('all');
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isDamSelectOpen, setIsDamSelectOpen] = React.useState(false);
+  const [isSireSelectOpen, setIsSireSelectOpen] = React.useState(false);
+  const [damSearchQuery, setDamSearchQuery] = React.useState('');
+  const [sireSearchQuery, setSireSearchQuery] = React.useState('');
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = React.useState(false);
+  const [successBreedingId, setSuccessBreedingId] = React.useState('');
 
   // Calculate 3-month breeding check date
   const getBreedingCheckDate = (breedingDate: string) => {
@@ -252,7 +279,15 @@ export default function BreedingOverview() {
     e.preventDefault();
     // Handle form submission
     console.log('New breeding record:', formData);
+    
+    // Generate breeding record ID (mock)
+    const newBreedingId = `BR-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+    setSuccessBreedingId(newBreedingId);
+    
+    // Close breeding modal and show success modal
     setIsModalOpen(false);
+    setIsSuccessModalOpen(true);
+    
     // Reset form
     setFormData({
       // Breeding Table
@@ -290,21 +325,36 @@ export default function BreedingOverview() {
   const totalBreedings = recentBreedings.length;
   const naturalBreedings = recentBreedings.filter(b => b.method === 'Natural').length;
 
+  const { userRole } = useStore();
+  const isViewer = userRole === 'viewer';
+
   return (
     <div className="space-y-6">
+      {/* View-Only Banner for Viewers */}
+      {isViewer && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center space-x-2">
+            <Eye className="w-4 h-4 text-blue-600" />
+            <p className="text-xs font-medium text-blue-900">View-Only Mode - You can view breeding records but cannot add or modify them</p>
+          </div>
+        </div>
+      )}
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">Breeding Records</h1>
           <p className="text-sm text-slate-600 mt-1">Record and manage breeding activities (sire and dam pairings)</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
-        >
-          <Plus size={16} />
-          <span>Record New Breeding</span>
-        </button>
+        {!isViewer && (
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+          >
+            <Plus size={16} />
+            <span>Record New Breeding</span>
+          </button>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -593,15 +643,30 @@ export default function BreedingOverview() {
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       Dam Livestock ID <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      name="damId"
-                      value={formData.damId}
-                      onChange={handleInputChange}
-                      placeholder="e.g., C-023"
-                      required
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="damId"
+                        value={formData.damId}
+                        readOnly
+                        placeholder={formData.species === '' ? 'Select species first' : 'Click to select female in heat'}
+                        required
+                        onClick={() => formData.species !== '' && setIsDamSelectOpen(true)}
+                        disabled={formData.species === ''}
+                        className={`w-full px-3 py-2 pr-10 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${formData.species === '' ? 'bg-slate-100 cursor-not-allowed text-slate-400' : 'cursor-pointer bg-white'}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => formData.species !== '' && setIsDamSelectOpen(true)}
+                        disabled={formData.species === ''}
+                        className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded ${formData.species === '' ? 'cursor-not-allowed' : 'hover:bg-slate-100'}`}
+                      >
+                        <Search size={18} className={formData.species === '' ? 'text-slate-300' : 'text-slate-400'} />
+                      </button>
+                    </div>
+                    <p className="text-xs text-pink-700 mt-1">
+                      ✓ Only females on heat and healthy
+                    </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -614,7 +679,9 @@ export default function BreedingOverview() {
                       onChange={handleInputChange}
                       placeholder="e.g., Brahman"
                       required
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      readOnly={!!formData.damId}
+                      disabled={!!formData.damId}
+                      className={`w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${formData.damId ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : ''}`}
                     />
                   </div>
                   <div>
@@ -627,7 +694,9 @@ export default function BreedingOverview() {
                       value={formData.damAge}
                       onChange={handleInputChange}
                       placeholder="e.g., 3y 2m"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      readOnly={!!formData.damId}
+                      disabled={!!formData.damId}
+                      className={`w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${formData.damId ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : ''}`}
                     />
                   </div>
                 </div>
@@ -640,7 +709,8 @@ export default function BreedingOverview() {
                       name="damHealthStatus"
                       value={formData.damHealthStatus}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      disabled={!!formData.damId}
+                      className={`w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${formData.damId ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : ''}`}
                     >
                       <option value="">Select status</option>
                       <option value="Healthy">Healthy</option>
@@ -674,7 +744,9 @@ export default function BreedingOverview() {
                       value={formData.heatSignsObserved}
                       onChange={handleInputChange}
                       placeholder="e.g., Standing heat"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      readOnly={!!formData.damId}
+                      disabled={!!formData.damId}
+                      className={`w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${formData.damId ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : ''}`}
                     />
                   </div>
                 </div>
@@ -690,15 +762,30 @@ export default function BreedingOverview() {
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       Sire Livestock ID <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      name="sireId"
-                      value={formData.sireId}
-                      onChange={handleInputChange}
-                      placeholder="e.g., B-001"
-                      required
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="sireId"
+                        value={formData.sireId}
+                        readOnly
+                        placeholder={formData.species === '' ? 'Select species first' : 'Click to select healthy male'}
+                        required
+                        onClick={() => formData.species !== '' && setIsSireSelectOpen(true)}
+                        disabled={formData.species === ''}
+                        className={`w-full px-3 py-2 pr-10 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${formData.species === '' ? 'bg-slate-100 cursor-not-allowed text-slate-400' : 'cursor-pointer bg-white'}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => formData.species !== '' && setIsSireSelectOpen(true)}
+                        disabled={formData.species === ''}
+                        className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded ${formData.species === '' ? 'cursor-not-allowed' : 'hover:bg-slate-100'}`}
+                      >
+                        <Search size={18} className={formData.species === '' ? 'text-slate-300' : 'text-slate-400'} />
+                      </button>
+                    </div>
+                    <p className="text-xs text-blue-700 mt-1">
+                      ✓ Only healthy males
+                    </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -711,7 +798,9 @@ export default function BreedingOverview() {
                       onChange={handleInputChange}
                       placeholder="e.g., Brahman"
                       required
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      readOnly={!!formData.sireId}
+                      disabled={!!formData.sireId}
+                      className={`w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${formData.sireId ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : ''}`}
                     />
                   </div>
                   <div>
@@ -724,7 +813,9 @@ export default function BreedingOverview() {
                       value={formData.sireAge}
                       onChange={handleInputChange}
                       placeholder="e.g., 4y 2m"
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      readOnly={!!formData.sireId}
+                      disabled={!!formData.sireId}
+                      className={`w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent ${formData.sireId ? 'bg-slate-50 text-slate-500 cursor-not-allowed' : ''}`}
                     />
                   </div>
                 </div>
@@ -826,6 +917,267 @@ export default function BreedingOverview() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Dam Selection Modal */}
+      {isDamSelectOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[80vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">Select Dam (Female)</h3>
+                <p className="text-xs text-slate-600 mt-1">Only females on heat and healthy are shown</p>
+              </div>
+              <button
+                onClick={() => {
+                  setIsDamSelectOpen(false);
+                  setDamSearchQuery('');
+                }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-4 border-b border-slate-200">
+              <div className="relative">
+                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="search"
+                  placeholder="Search by ID, name, or breed..."
+                  value={damSearchQuery}
+                  onChange={(e) => setDamSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="space-y-2">
+                {mockLivestock
+                  .filter((animal) => 
+                    animal.sex === 'Female' && 
+                    animal.status === 'Healthy' && 
+                    animal.isOnHeat &&
+                    (formData.species === '' || animal.species === formData.species) &&
+                    (damSearchQuery === '' || 
+                      animal.id.toLowerCase().includes(damSearchQuery.toLowerCase()) ||
+                      animal.name.toLowerCase().includes(damSearchQuery.toLowerCase()) ||
+                      animal.breed.toLowerCase().includes(damSearchQuery.toLowerCase()))
+                  )
+                  .map((animal) => (
+                    <button
+                      key={animal.id}
+                      type="button"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          damId: animal.id,
+                          damBreed: animal.breed,
+                          damAge: animal.age,
+                          damHealthStatus: animal.status,
+                          heatSignsObserved: 'Confirmed in heat'
+                        });
+                        setIsDamSelectOpen(false);
+                        setDamSearchQuery('');
+                      }}
+                      className="w-full p-4 border-2 border-pink-200 bg-pink-50 hover:border-pink-400 hover:bg-pink-100 rounded-lg transition-colors text-left"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-bold text-slate-900">{animal.id}</span>
+                          <span className="px-2 py-0.5 bg-pink-200 text-pink-900 text-xs font-bold rounded">
+                            ♀ ON HEAT
+                          </span>
+                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-medium rounded">
+                            {animal.status}
+                          </span>
+                        </div>
+                        <span className="text-xs text-slate-600">{animal.age}</span>
+                      </div>
+                      <p className="text-sm text-slate-600">{animal.name} • {animal.breed}</p>
+                      <p className="text-xs text-pink-700 mt-1">{animal.breedingStatus}</p>
+                    </button>
+                  ))}
+                {mockLivestock.filter((animal) => 
+                  animal.sex === 'Female' && 
+                  animal.status === 'Healthy' && 
+                  animal.isOnHeat &&
+                  (formData.species === '' || animal.species === formData.species)
+                ).length === 0 && (
+                  <div className="text-center py-8 text-slate-500">
+                    <Heart size={48} className="mx-auto mb-4 text-slate-300" />
+                    <p className="font-medium">No females available for breeding</p>
+                    <p className="text-sm mt-1">
+                      {formData.species === '' 
+                        ? 'Please select a species first'
+                        : 'No females are currently on heat and healthy'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sire Selection Modal */}
+      {isSireSelectOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[80vh] flex flex-col">
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">Select Sire (Male)</h3>
+                <p className="text-xs text-slate-600 mt-1">Only healthy males are shown</p>
+              </div>
+              <button
+                onClick={() => {
+                  setIsSireSelectOpen(false);
+                  setSireSearchQuery('');
+                }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-4 border-b border-slate-200">
+              <div className="relative">
+                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="search"
+                  placeholder="Search by ID, name, or breed..."
+                  value={sireSearchQuery}
+                  onChange={(e) => setSireSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="space-y-2">
+                {mockLivestock
+                  .filter((animal) => 
+                    animal.sex === 'Male' && 
+                    animal.status === 'Healthy' &&
+                    (formData.species === '' || animal.species === formData.species) &&
+                    (sireSearchQuery === '' || 
+                      animal.id.toLowerCase().includes(sireSearchQuery.toLowerCase()) ||
+                      animal.name.toLowerCase().includes(sireSearchQuery.toLowerCase()) ||
+                      animal.breed.toLowerCase().includes(sireSearchQuery.toLowerCase()))
+                  )
+                  .map((animal) => (
+                    <button
+                      key={animal.id}
+                      type="button"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          sireId: animal.id,
+                          sireBreed: animal.breed,
+                          sireAge: animal.age
+                        });
+                        setIsSireSelectOpen(false);
+                        setSireSearchQuery('');
+                      }}
+                      className="w-full p-4 border-2 border-blue-200 bg-blue-50 hover:border-blue-400 hover:bg-blue-100 rounded-lg transition-colors text-left"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-bold text-slate-900">{animal.id}</span>
+                          <span className="px-2 py-0.5 bg-blue-200 text-blue-900 text-xs font-bold rounded">
+                            ♂ MALE
+                          </span>
+                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-medium rounded">
+                            {animal.status}
+                          </span>
+                        </div>
+                        <span className="text-xs text-slate-600">{animal.age}</span>
+                      </div>
+                      <p className="text-sm text-slate-600">{animal.name} • {animal.breed}</p>
+                    </button>
+                  ))}
+                {mockLivestock.filter((animal) => 
+                  animal.sex === 'Male' && 
+                  animal.status === 'Healthy' &&
+                  (formData.species === '' || animal.species === formData.species)
+                ).length === 0 && (
+                  <div className="text-center py-8 text-slate-500">
+                    <User size={48} className="mx-auto mb-4 text-slate-300" />
+                    <p className="font-medium">No males available for breeding</p>
+                    <p className="text-sm mt-1">
+                      {formData.species === '' 
+                        ? 'Please select a species first'
+                        : 'No healthy males found for this species'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {isSuccessModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[70] flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-md">
+            <div className="p-6 text-center">
+              {/* Success Icon */}
+              <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+                <CheckCircle size={32} className="text-emerald-600" />
+              </div>
+
+              {/* Success Message */}
+              <h3 className="text-xl font-bold text-slate-900 mb-2">
+                Breeding Record Added Successfully!
+              </h3>
+              <p className="text-sm text-slate-600 mb-4">
+                Breeding record <span className="font-mono font-bold text-primary-600">{successBreedingId}</span> has been created.
+              </p>
+
+              {/* Alert Information */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <AlertCircle size={20} className="text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-semibold text-blue-900 mb-1">
+                      Automatic Alert Scheduled
+                    </h4>
+                    <p className="text-xs text-blue-800">
+                      You will receive an alert <span className="font-bold">2 weeks in advance</span> (approximately <span className="font-bold">2.5 months from now</span>) to remind you about the pregnancy check for this breeding.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setIsSuccessModalOpen(false)}
+                  className="flex-1 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg transition-colors"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setIsSuccessModalOpen(false);
+                    setIsModalOpen(true);
+                  }}
+                  className="flex-1 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  Add Another
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -19,8 +19,10 @@ import {
   DollarSign,
   Save,
   Plus,
-  Download
+  Download,
+  Eye
 } from 'lucide-react';
+import { useStore } from '../store/useStore';
 
 // Mock data - only A-001 for UI/UX demonstration
 const mockAnimalData = {
@@ -28,6 +30,7 @@ const mockAnimalData = {
     // Basic Information
     livestockId: 'A-001',
     species: 'Cattle',
+    category: 'Cow',
     breed: 'Holstein',
     sex: 'Female',
     dateOfBirth: '2022-03-15',
@@ -165,6 +168,8 @@ const mockAnimalData = {
 
 export default function LivestockProfile() {
   const { id } = useParams<{ id: string }>();
+  const { userRole } = useStore();
+  const isViewer = userRole === 'viewer';
   const animal = mockAnimalData[id as keyof typeof mockAnimalData];
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const [showSuccessModal, setShowSuccessModal] = React.useState(false);
@@ -212,6 +217,7 @@ export default function LivestockProfile() {
   const [editFormData, setEditFormData] = React.useState({
     livestockId: '',
     species: '',
+    category: '',
     breed: '',
     sex: '',
     dateOfBirth: '',
@@ -234,6 +240,7 @@ export default function LivestockProfile() {
       setEditFormData({
         livestockId: animal.livestockId,
         species: animal.species,
+        category: animal.category,
         breed: animal.breed,
         sex: animal.sex,
         dateOfBirth: animal.dateOfBirth,
@@ -800,16 +807,28 @@ export default function LivestockProfile() {
             <Download size={16} />
             <span>Export Profile</span>
           </button>
-          <button 
-            onClick={handleEditClick}
-            className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-          >
-            <Edit size={16} />
-            <span>Edit</span>
-          </button>
+          {!isViewer && (
+            <button 
+              onClick={handleEditClick}
+              className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <Edit size={16} />
+              <span>Edit</span>
+            </button>
+          )}
         </div>
       </div>
 
+      {/* View-Only Banner for Viewers */}
+      {isViewer && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+          <div className="flex items-center space-x-2">
+            <Eye className="w-4 h-4 text-blue-600" />
+            <p className="text-xs font-medium text-blue-900">View-Only Mode - You can view livestock details but cannot edit or add records</p>
+          </div>
+        </div>
+      )}
+      
       {/* AMR Warning Banner */}
       {animal.onAntibiotics && (
         <div className="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm mb-3">
@@ -845,12 +864,14 @@ export default function LivestockProfile() {
                     {new Date(animal.nextCheckupDate).toLocaleDateString()} ({Math.ceil((new Date(animal.nextCheckupDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}d)
                   </span>
                 </div>
-                <button 
-                  onClick={() => setIsCheckupModalOpen(true)}
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded transition-colors"
-                >
-                  Record Checkup
-                </button>
+                {!isViewer && (
+                  <button 
+                    onClick={() => setIsCheckupModalOpen(true)}
+                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded transition-colors"
+                  >
+                    Record Checkup
+                  </button>
+                )}
               </div>
               <p className="text-xs text-blue-700">
                 Last: {new Date(animal.lastCheckupDate).toLocaleDateString()} • Checkup #{animal.checkupCount}
@@ -872,9 +893,13 @@ export default function LivestockProfile() {
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Livestock ID</p>
                 <p className="text-2xl font-bold text-primary-700 font-mono">{animal.livestockId}</p>
               </div>
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Species</p>
+                <p className="text-base font-bold text-blue-800">{animal.species}</p>
+              </div>
               <div className="p-3 bg-primary-50 rounded-lg border border-primary-200">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Type/Category</p>
-                <p className="text-base font-bold text-primary-800">{animal.species}</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Category</p>
+                <p className="text-base font-bold text-primary-800">{animal.category}</p>
               </div>
               <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Breed</p>
@@ -1279,43 +1304,51 @@ export default function LivestockProfile() {
           <div className="bg-white rounded-lg border border-slate-200 p-6">
             <h3 className="text-sm font-semibold text-slate-900 mb-4">Quick Actions</h3>
             <div className="space-y-2">
-              <Link
-                to={`/vaccination?livestockId=${animal.livestockId}`}
-                className="w-full flex items-center space-x-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                <Syringe size={16} />
-                <span>Add Vaccination</span>
-              </Link>
-              {animal.sex === 'Female' && (
-                <button 
-                  onClick={() => setIsBreedingModalOpen(true)}
-                  className="w-full flex items-center justify-between px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
-                >
-                  <div className="flex items-center space-x-2">
-                    <Baby size={16} />
-                    <span>Breeding Status</span>
-                  </div>
-                  {animal.isOnHeat && (
-                    <span className="px-2 py-0.5 bg-white text-purple-600 text-xs font-semibold rounded">
-                      OPEN
-                    </span>
+              {!isViewer && (
+                <>
+                  <Link
+                    to={`/vaccination?livestockId=${animal.livestockId}`}
+                    className="w-full flex items-center space-x-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    <Syringe size={16} />
+                    <span>Add Vaccination</span>
+                  </Link>
+                  {animal.sex === 'Female' && (
+                    <button 
+                      onClick={() => setIsBreedingModalOpen(true)}
+                      className="w-full flex items-center justify-between px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Baby size={16} />
+                        <span>Breeding Status</span>
+                      </div>
+                      {animal.isOnHeat && (
+                        <span className="px-2 py-0.5 bg-white text-purple-600 text-xs font-semibold rounded">
+                          OPEN
+                        </span>
+                      )}
+                    </button>
                   )}
-                </button>
+                </>
               )}
-              <button 
-                onClick={() => setIsWeightModalOpen(true)}
-                className="w-full flex items-center space-x-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-lg border border-slate-200 transition-colors"
-              >
-                <Weight size={16} />
-                <span>Update Weight</span>
-              </button>
-              <button
-                onClick={() => setIsBreedingHistoryModalOpen(true)}
-                className="w-full flex items-center space-x-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-lg border border-slate-200 transition-colors"
-              >
-                <FileText size={16} />
-                <span>Breeding History</span>
-              </button>
+              {!isViewer && (
+                <>
+                  <button 
+                    onClick={() => setIsWeightModalOpen(true)}
+                    className="w-full flex items-center space-x-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-lg border border-slate-200 transition-colors"
+                  >
+                    <Weight size={16} />
+                    <span>Update Weight</span>
+                  </button>
+                  <button
+                    onClick={() => setIsBreedingHistoryModalOpen(true)}
+                    className="w-full flex items-center space-x-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-lg border border-slate-200 transition-colors"
+                  >
+                    <FileText size={16} />
+                    <span>Breeding History</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -1411,6 +1444,54 @@ export default function LivestockProfile() {
                       <option value="Goat">Goat</option>
                       <option value="Sheep">Sheep</option>
                     </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Category <span className="text-red-500">*</span>
+                    </label>
+                    {!editFormData.species ? (
+                      <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-400 text-sm">
+                        Please select a species first
+                      </div>
+                    ) : (
+                      <select
+                        name="category"
+                        value={editFormData.category}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      >
+                        <option value="">Select category</option>
+                        {editFormData.species === 'Cattle' && (
+                          <>
+                            <option value="Bull">Bull (Adult Male)</option>
+                            <option value="Cow">Cow (Adult Female)</option>
+                            <option value="Heifer">Heifer (Young Female)</option>
+                            <option value="Steer">Steer (Castrated Male)</option>
+                            <option value="Calf">Calf (Young)</option>
+                          </>
+                        )}
+                        {editFormData.species === 'Goat' && (
+                          <>
+                            <option value="Buck">Buck (Adult Male)</option>
+                            <option value="Doe">Doe (Adult Female)</option>
+                            <option value="Maiden Doe">Maiden Doe (Young Female)</option>
+                            <option value="Wether">Wether (Castrated Male)</option>
+                            <option value="Kid">Kid (Young)</option>
+                          </>
+                        )}
+                        {editFormData.species === 'Sheep' && (
+                          <>
+                            <option value="Ram">Ram (Adult Male)</option>
+                            <option value="Ewe">Ewe (Adult Female)</option>
+                            <option value="Maiden Ewe">Maiden Ewe (Young Female)</option>
+                            <option value="Wether">Wether (Castrated Male)</option>
+                            <option value="Lamb">Lamb (Young)</option>
+                          </>
+                        )}
+                      </select>
+                    )}
                   </div>
 
                   <div>
@@ -2116,7 +2197,12 @@ export default function LivestockProfile() {
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                       <div className="p-3 bg-slate-50 rounded-lg">
                         <p className="text-xs text-slate-600 mb-1">Bull/Sire</p>
-                        <p className="text-sm font-semibold text-slate-900">{record.bullId}</p>
+                        <Link 
+                          to={`/livestock/${record.bullId}`}
+                          className="text-sm font-semibold text-primary-600 hover:text-primary-700 hover:underline block"
+                        >
+                          {record.bullId}
+                        </Link>
                         <p className="text-xs text-slate-600">{record.bullBreed}</p>
                       </div>
                       <div className="p-3 bg-slate-50 rounded-lg">
