@@ -225,34 +225,6 @@ export default function AddLivestock() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Newborn Toggle - Prominent Card */}
-        <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border-2 border-emerald-200 p-5">
-          <div className="flex items-start space-x-3">
-            <input
-              type="checkbox"
-              id="newbornToggle"
-              checked={isNewborn}
-              onChange={handleNewbornToggle}
-              className="w-5 h-5 mt-0.5 text-emerald-600 border-emerald-300 rounded focus:ring-2 focus:ring-emerald-500"
-            />
-            <div className="flex-1">
-              <label htmlFor="newbornToggle" className="cursor-pointer">
-                <div className="flex items-center space-x-2">
-                  <span className="text-base font-semibold text-emerald-900">This is a newborn</span>
-                  {isNewborn && (
-                    <span className="px-2 py-0.5 bg-emerald-600 text-white text-xs font-medium rounded-full">Active</span>
-                  )}
-                </div>
-                <p className="text-sm text-emerald-700 mt-1">
-                  {isNewborn 
-                    ? 'Newborn mode: Enter dam/sire info, birth date, and health assessment' 
-                    : 'Check this box if registering a newborn kid/lamb/calf (will auto-assign category)'}
-                </p>
-              </label>
-            </div>
-          </div>
-        </div>
-
         {/* Section 1: Livestock Basic Information */}
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
           <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">

@@ -232,7 +232,6 @@ export default function Dashboard() {
   ]);
 
   const toggleTask = (id: number) => {
-    if (isViewer) return; // Viewers can't modify tasks
     setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
   };
 
@@ -421,15 +420,24 @@ export default function Dashboard() {
               <h3 className="text-sm font-semibold text-slate-900">Actions</h3>
             </div>
             <div className="p-3 space-y-2">
-              <button className="w-full px-4 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">
+              <Link
+                to="/livestock/add"
+                className="block w-full px-4 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors text-center"
+              >
                 Add Animal
-              </button>
-              <button className="w-full px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors">
+              </Link>
+              <Link
+                to="/vaccination"
+                className="block w-full px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors text-center"
+              >
                 Health Check
-              </button>
-              <button className="w-full px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors">
+              </Link>
+              <Link
+                to="/reports"
+                className="block w-full px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors text-center"
+              >
                 View Reports
-              </button>
+              </Link>
               <Link
                 to="/livestock"
                 className="block w-full px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors text-center"

@@ -206,6 +206,17 @@ export default function LivestockProfile() {
     imageFile: null as File | null,
     imagePreview: ''
   });
+  const [isStatusModalOpen, setIsStatusModalOpen] = React.useState(false);
+  const [selectedStatus, setSelectedStatus] = React.useState(animal?.status || 'Active');
+  const [isSoldModalOpen, setIsSoldModalOpen] = React.useState(false);
+  const [soldFormData, setSoldFormData] = React.useState({
+    soldDate: new Date().toISOString().split('T')[0],
+    buyerName: '',
+    buyerContact: '',
+    buyerAddress: '',
+    sellingPrice: '',
+    notes: ''
+  });
   
   // Breed data - Common Philippine breeds organized by species
   const [breedsBySpecies, setBreedsBySpecies] = React.useState({
@@ -744,6 +755,8 @@ export default function LivestockProfile() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Healthy': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'Monitor': return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'Sick': return 'bg-red-50 text-red-700 border-red-200';
       case 'Active': return 'bg-primary-50 text-primary-700 border-primary-200';
       case 'Sold': return 'bg-slate-50 text-slate-700 border-slate-200';
       case 'Deceased': return 'bg-red-100 text-red-900 border-red-500 border-2 font-bold';
@@ -756,6 +769,10 @@ export default function LivestockProfile() {
       case 'Healthy':
       case 'Active':
         return CheckCircle;
+      case 'Monitor':
+      case 'Sick':
+      case 'Deceased':
+        return AlertCircle;
       default:
         return AlertCircle;
     }
@@ -935,7 +952,10 @@ export default function LivestockProfile() {
               </div>
               <div>
                 <p className="text-xs font-medium text-slate-500 mb-1">Status</p>
-                <p className="text-sm text-slate-900">{animal.status}</p>
+                <span className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(animal.status)}`}>
+                  <StatusIcon size={14} />
+                  <span>{animal.status}</span>
+                </span>
               </div>
               {animal.notes && (
                 <div className="col-span-2">
@@ -1334,6 +1354,19 @@ export default function LivestockProfile() {
               {!isViewer && (
                 <>
                   <button 
+                    onClick={() => setIsStatusModalOpen(true)}
+                    className="w-full flex items-center justify-between px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-lg border border-slate-200 transition-colors"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <AlertCircle size={16} />
+                      <span>Update Status</span>
+                    </div>
+                    <span className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded text-xs font-medium border ${getStatusColor(animal.status)}`}>
+                      <StatusIcon size={10} />
+                      <span>{animal.status}</span>
+                    </span>
+                  </button>
+                  <button 
                     onClick={() => setIsWeightModalOpen(true)}
                     className="w-full flex items-center space-x-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-lg border border-slate-200 transition-colors"
                   >
@@ -1496,7 +1529,7 @@ export default function LivestockProfile() {
 
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Breed <span className="text-red-500">*</span>
+                      Breed
                     </label>
                     {!editFormData.species ? (
                       <div className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-400 text-sm">
@@ -1508,7 +1541,6 @@ export default function LivestockProfile() {
                           name="breed"
                           value={editFormData.breed}
                           onChange={handleInputChange}
-                          required
                           className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                         >
                           <option value="">Select breed</option>
@@ -1605,7 +1637,7 @@ export default function LivestockProfile() {
                     </select>
                   </div>
 
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       Current Weight (kg) <span className="text-red-500">*</span>
                     </label>
@@ -1618,23 +1650,6 @@ export default function LivestockProfile() {
                       required
                       className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Status <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="status"
-                      value={editFormData.status}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Sold">Sold</option>
-                      <option value="Deceased">Deceased</option>
-                    </select>
                   </div>
 
                   <div className="md:col-span-2">
@@ -2444,6 +2459,287 @@ export default function LivestockProfile() {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Status Update Modal */}
+      {isStatusModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-t-lg">
+              <div className="flex items-center space-x-2">
+                <AlertCircle size={20} className="text-primary-600" />
+                <h2 className="text-xl font-semibold text-slate-900">Update Status</h2>
+              </div>
+              <button
+                onClick={() => setIsStatusModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              console.log('Status Updated:', {
+                livestockId: animal.livestockId,
+                oldStatus: animal.status,
+                newStatus: selectedStatus,
+                timestamp: new Date().toISOString()
+              });
+              
+              if (selectedStatus === 'Deceased') {
+                setIsStatusModalOpen(false);
+                setIsDeceasedModalOpen(true);
+              } else if (selectedStatus === 'Sold') {
+                setIsStatusModalOpen(false);
+                setIsSoldModalOpen(true);
+              } else {
+                setShowSuccessModal(true);
+                setIsStatusModalOpen(false);
+                setTimeout(() => {
+                  setShowSuccessModal(false);
+                }, 3000);
+              }
+            }} className="p-6 space-y-4">
+              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <p className="text-xs text-slate-600 mb-1">Current Status</p>
+                <span className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(animal.status)}`}>
+                  <StatusIcon size={14} />
+                  <span>{animal.status}</span>
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  New Status <span className="text-red-500">*</span>
+                </label>
+                <div className="space-y-2">
+                  {['Active', 'Sold', 'Deceased'].map((status) => (
+                    <label key={status} className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      selectedStatus === status 
+                        ? 'border-primary-500 bg-primary-50' 
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}>
+                      <input
+                        type="radio"
+                        name="status"
+                        value={status}
+                        checked={selectedStatus === status}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                        className="w-4 h-4 text-primary-600 focus:ring-2 focus:ring-primary-500"
+                      />
+                      <span className={`ml-3 text-sm font-medium ${
+                        selectedStatus === status ? 'text-primary-900' : 'text-slate-700'
+                      }`}>
+                        {status}
+                      </span>
+                      {status === 'Deceased' && (
+                        <span className="ml-auto text-xs text-red-600 font-medium">Requires Details</span>
+                      )}
+                      {status === 'Sold' && (
+                        <span className="ml-auto text-xs text-blue-600 font-medium">Requires Details</span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {selectedStatus === 'Deceased' && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-xs text-amber-900">
+                    ⚠️ Selecting "Deceased" will open a form to record death details.
+                  </p>
+                </div>
+              )}
+
+              {selectedStatus === 'Sold' && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-xs text-blue-900">
+                    💰 Selecting "Sold" will open a form to record buyer and selling details.
+                  </p>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setIsStatusModalOpen(false)}
+                  className="px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex items-center space-x-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+                >
+                  <Save size={16} />
+                  <span>Update Status</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Sold Information Modal */}
+      {isSoldModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div className="sticky top-0 bg-blue-50 border-b border-blue-200 px-6 py-4 flex items-center justify-between rounded-t-lg">
+              <div className="flex items-center space-x-2">
+                <DollarSign size={20} className="text-blue-600" />
+                <h2 className="text-xl font-semibold text-blue-900">Record Selling Information</h2>
+              </div>
+              <button
+                onClick={() => {
+                  setIsSoldModalOpen(false);
+                  setSelectedStatus(animal?.status || 'Active');
+                }}
+                className="text-blue-400 hover:text-blue-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              console.log('Sold Record:', {
+                livestockId: animal.livestockId,
+                soldDate: soldFormData.soldDate,
+                buyerName: soldFormData.buyerName,
+                buyerContact: soldFormData.buyerContact,
+                buyerAddress: soldFormData.buyerAddress,
+                sellingPrice: soldFormData.sellingPrice,
+                notes: soldFormData.notes,
+                recordedBy: 'Current User',
+                timestamp: new Date().toISOString()
+              });
+              
+              setIsSoldModalOpen(false);
+              setShowSuccessModal(true);
+              setTimeout(() => {
+                setShowSuccessModal(false);
+              }, 3000);
+            }} className="p-6 space-y-4">
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-900 font-medium">
+                  💰 You are marking <span className="font-bold">{animal?.livestockId}</span> as sold. 
+                  Please record the buyer and transaction details.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Date of Sale <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={soldFormData.soldDate}
+                  onChange={(e) => setSoldFormData({ ...soldFormData, soldDate: e.target.value })}
+                  max={new Date().toISOString().split('T')[0]}
+                  required
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Buyer Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={soldFormData.buyerName}
+                    onChange={(e) => setSoldFormData({ ...soldFormData, buyerName: e.target.value })}
+                    required
+                    placeholder="Juan dela Cruz"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Buyer Contact <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={soldFormData.buyerContact}
+                    onChange={(e) => setSoldFormData({ ...soldFormData, buyerContact: e.target.value })}
+                    required
+                    placeholder="0912-345-6789"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Buyer Address
+                </label>
+                <input
+                  type="text"
+                  value={soldFormData.buyerAddress}
+                  onChange={(e) => setSoldFormData({ ...soldFormData, buyerAddress: e.target.value })}
+                  placeholder="Brgy. Tambler, General Santos City"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Selling Price (PHP ₱) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  value={soldFormData.sellingPrice}
+                  onChange={(e) => setSoldFormData({ ...soldFormData, sellingPrice: e.target.value })}
+                  required
+                  placeholder="25000.00"
+                  step="0.01"
+                  min="0"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Additional Notes
+                </label>
+                <textarea
+                  value={soldFormData.notes}
+                  onChange={(e) => setSoldFormData({ ...soldFormData, notes: e.target.value })}
+                  rows={3}
+                  placeholder="Payment method, transaction details, or any relevant notes..."
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSoldModalOpen(false);
+                    setSelectedStatus(animal?.status || 'Active');
+                  }}
+                  className="px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                >
+                  <Save size={16} />
+                  <span>Confirm Sale Record</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -96,15 +96,15 @@ export default function Sidebar() {
       </div>
 
       {/* Toggle Button */}
-      {!collapsed && (
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-20 w-6 h-6 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:border-slate-300 transition-colors shadow-sm"
-          aria-label="Toggle sidebar"
-        >
-          <span className="text-xs text-slate-400">◀</span>
-        </button>
-      )}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="absolute -right-3 top-20 w-6 h-6 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:border-slate-300 transition-colors shadow-sm hover:shadow-md"
+        aria-label="Toggle sidebar"
+      >
+        <span className="text-xs text-slate-400">
+          {collapsed ? '▶' : '◀'}
+        </span>
+      </button>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto overflow-x-hidden py-6 px-3 scrollbar-thin">
