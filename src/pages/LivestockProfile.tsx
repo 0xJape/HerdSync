@@ -647,14 +647,14 @@ export default function LivestockProfile() {
     if (printWindow) {
       printWindow.document.write(htmlContent);
       printWindow.document.close();
-      printWindow.focus();
       
       // Wait for content to load then trigger print dialog
-      printWindow.onload = () => {
-        setTimeout(() => {
-          printWindow.print();
-        }, 250);
-      };
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+      }, 500);
+    } else {
+      alert('Please allow popups for this site to export the profile.');
     }
   };
 

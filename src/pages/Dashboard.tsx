@@ -40,31 +40,31 @@ function StatCard({ title, value, change, changeType = 'neutral', subtitle, icon
   };
 
   return (
-    <div className="group p-5 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-all duration-200">
-      <div className="flex items-start justify-between mb-3">
+    <div className="group p-6 bg-gradient-to-br from-white to-slate-50 rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-300">
+      <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <p className="text-xs font-medium text-slate-500 mb-1">{title}</p>
-          <p className="text-2xl font-semibold text-slate-900">{value}</p>
+          <p className="text-sm font-semibold text-slate-600 mb-2">{title}</p>
+          <p className="text-3xl font-bold text-slate-900">{value}</p>
         </div>
         {Icon && (
-          <div className={`${iconBg} w-9 h-9 rounded-lg flex items-center justify-center`}>
-            <Icon size={18} className="text-slate-600" />
+          <div className={`${iconBg} w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
+            <Icon size={24} className="text-slate-700" />
           </div>
         )}
       </div>
       
       <div className="flex items-center justify-between">
         {change && (
-          <div className="flex items-center space-x-1">
-            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${changeColors[changeType]}`}>
+          <div className="flex items-center space-x-2">
+            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold shadow-sm ${changeColors[changeType]}`}>
               {changeType === 'positive' && '↑ '}
               {changeType === 'negative' && '↓ '}
               {change}
             </span>
-            <span className="text-xs text-slate-500">from last month</span>
+            <span className="text-xs text-slate-500 font-medium">vs last month</span>
           </div>
         )}
-        {subtitle && !change && <span className="text-xs text-slate-500">{subtitle}</span>}
+        {subtitle && !change && <span className="text-xs text-slate-500 font-medium">{subtitle}</span>}
       </div>
     </div>
   );
@@ -108,7 +108,7 @@ function AlertItem({ type, message, timestamp, animalId }: AlertProps) {
     return (
       <Link
         to={`/livestock/${animalId}`}
-        className="group flex items-start space-x-3 p-3 hover:bg-slate-50 rounded-lg transition-all cursor-pointer"
+        className="group flex items-start space-x-3 p-4 hover:bg-slate-50 rounded-lg transition-all cursor-pointer border-l-2 border-transparent hover:border-primary-400"
       >
         {content}
       </Link>
@@ -116,7 +116,7 @@ function AlertItem({ type, message, timestamp, animalId }: AlertProps) {
   }
 
   return (
-    <div className="group flex items-start space-x-3 p-3 hover:bg-slate-50 rounded-lg transition-all">
+    <div className="group flex items-start space-x-3 p-4 hover:bg-slate-50 rounded-lg transition-all border-l-2 border-transparent">
       {content}
     </div>
   );
@@ -138,18 +138,18 @@ function TaskItem({ task, dueDate, completed = false, onToggle, priority = 'medi
   };
 
   return (
-    <div className={`group flex items-center space-x-3 p-3 border-l-2 ${priorityColors[priority]} hover:bg-slate-50 rounded transition-all`}>
+    <div className="group flex items-center space-x-3 p-4 border-l-3 ${priorityColors[priority]} hover:bg-slate-50 rounded-lg transition-all">
       <input
         type="checkbox"
         checked={completed}
         onChange={onToggle}
-        className="h-4 w-4 text-slate-900 rounded border-slate-300 focus:ring-1 focus:ring-slate-400 cursor-pointer"
+        className="h-5 w-5 text-primary-600 rounded border-slate-300 focus:ring-2 focus:ring-primary-400 cursor-pointer"
       />
       <div className="flex-1 min-w-0 flex items-center justify-between">
-        <p className={`text-sm ${completed ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+        <p className={`text-sm font-medium ${completed ? 'line-through text-slate-400' : 'text-slate-900'}`}>
           {task}
         </p>
-        <span className="text-xs text-slate-500 ml-3">{dueDate}</span>
+        <span className="text-xs text-slate-600 font-semibold ml-3">{dueDate}</span>
       </div>
     </div>
   );
@@ -177,39 +177,39 @@ function ActivityLogItem({ action, description, user, timestamp, entityType, ent
   const { Icon, text, bg, label } = actionConfig[action];
 
   return (
-    <div className="group flex items-start space-x-3 p-3 hover:bg-slate-50 rounded-lg transition-all">
-      <div className={`flex-shrink-0 ${bg} w-8 h-8 rounded-lg flex items-center justify-center`}>
-        <Icon size={14} className={text} />
+    <div className="group flex items-start space-x-3 p-4 hover:bg-slate-50 rounded-lg transition-all border-l-2 border-transparent hover:border-slate-300">
+      <div className={`flex-shrink-0 ${bg} w-10 h-10 rounded-lg flex items-center justify-center shadow-sm`}>
+        <Icon size={18} className={text} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center space-x-2 mb-0.5">
-              <span className={`text-xs font-semibold ${text}`}>{label}</span>
+            <div className="flex items-center space-x-2 mb-1">
+              <span className={`text-xs font-bold ${text}`}>{label}</span>
               {entityType && (
                 <span className="text-xs text-slate-400">•</span>
               )}
               {entityType && (
-                <span className="text-xs text-slate-500 capitalize">{entityType}</span>
+                <span className="text-xs text-slate-500 font-semibold capitalize">{entityType}</span>
               )}
             </div>
-            <p className="text-sm text-slate-900">{description}</p>
-            <div className="flex items-center space-x-3 mt-1.5">
-              <div className="flex items-center space-x-1 text-xs text-slate-500">
-                <User size={12} />
-                <span>{user}</span>
+            <p className="text-sm font-medium text-slate-900">{description}</p>
+            <div className="flex items-center space-x-3 mt-2">
+              <div className="flex items-center space-x-1.5 text-xs text-slate-600">
+                <User size={13} />
+                <span className="font-medium">{user}</span>
               </div>
               <span className="text-xs text-slate-400">•</span>
-              <div className="flex items-center space-x-1 text-xs text-slate-500">
-                <Clock size={12} />
-                <span>{timestamp}</span>
+              <div className="flex items-center space-x-1.5 text-xs text-slate-600">
+                <Clock size={13} />
+                <span className="font-medium">{timestamp}</span>
               </div>
             </div>
           </div>
           {entityId && entityType === 'livestock' && (
             <Link
               to={`/livestock/${entityId}`}
-              className="flex-shrink-0 text-xs font-medium text-slate-600 hover:text-slate-900 ml-2"
+              className="flex-shrink-0 text-xs font-bold text-primary-600 hover:text-primary-700 ml-2"
             >
               View →
             </Link>
@@ -322,14 +322,14 @@ export default function Dashboard() {
       )}
       
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
           title="Total Animals"
           value="67"
           change="10.2%"
           changeType="positive"
           icon={Beef}
-          iconBg="bg-slate-100"  
+          iconBg="bg-primary-50"  
         />
         <StatCard
           title="Healthy Animals"
@@ -337,7 +337,7 @@ export default function Dashboard() {
           change="1.8%"
           changeType="positive"
           icon={HeartPulse}
-          iconBg="bg-emerald-50"
+          iconBg="bg-emerald-100"
         />
         <StatCard
           title="Activities this Week"
@@ -345,129 +345,31 @@ export default function Dashboard() {
           change="12.5%"
           changeType="positive"
           icon={AlertOctagon}
-          iconBg="bg-amber-50"
+          iconBg="bg-amber-100"
         />
         <StatCard
           title="Active Breeding"
-          value="33"
-          change="8.2%"
+          value="8"
+          change="1.1%"
           changeType="positive"
           icon={Users}
-          iconBg="bg-blue-50"
+          iconBg="bg-blue-100"
         />
       </div>
 
       {/* Two Column Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        {/* Recent Alerts - Takes 2 columns */}
-        <div className="xl:col-span-2">
-          <div className="bg-white rounded-lg border border-slate-200">
-            <div className="px-5 py-4 border-b border-slate-200">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-slate-900">Alerts</h3>
-                <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-medium rounded">
-                  4
-                </span>
-              </div>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+        {/* Left Column - Chart and Quick Actions */}
+        <div className="xl:col-span-1 space-y-5">
+          {/* Livestock Distribution Chart */}
+          <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border border-slate-200 shadow-sm">
+            <div className="px-4 py-3 border-b border-slate-200 bg-white/70 backdrop-blur-sm">
+              <h3 className="text-sm font-bold text-slate-900">Livestock Distribution</h3>
             </div>
-            <div className="p-2">
-              <AlertItem
-                type="warning"
-                message="3-Month Pregnancy Check: Cow C-011 bred on Sep 15 - Check due by Dec 15"
-                timestamp="23 days"
-                animalId="C-011"
-              />
-              <AlertItem
-                type="warning"
-                message="3-Month Pregnancy Check: Cow C-023 bred on Oct 5 - Check overdue"
-                timestamp="Overdue"
-                animalId="C-023"
-              />
-              <AlertItem
-                type="warning"
-                message="Rabies vaccine overdue for Boer Doe G-012"
-                timestamp="Overdue"
-                animalId="G-012"
-              />
-              <AlertItem
-                type="info"
-                message="CDT vaccine due for Dorper Ewe S-005 on Dec 8"
-                timestamp="16 days"
-                animalId="S-005"
-              />
-              <AlertItem
-                type="success"
-                message="Withdrawal period ends today: Brahman Bull C-008 can be cleared for sale"
-                timestamp="Today"
-                animalId="C-008"
-              />
-            </div>
-            <div className="px-5 py-3 border-t border-slate-200">
-              <Link
-                to="/alerts"
-                className="text-xs font-medium text-slate-600 hover:text-slate-900"
-              >
-                View all →
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="xl:col-span-1">
-          <div className="bg-white rounded-lg border border-slate-200">
-            <div className="px-5 py-4 border-b border-slate-200">
-              <h3 className="text-sm font-semibold text-slate-900">Actions</h3>
-            </div>
-            <div className="p-3 space-y-2">
-              <Link
-                to="/livestock/add"
-                className="block w-full px-4 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors text-center"
-              >
-                Add Animal
-              </Link>
-              <Link
-                to="/vaccination"
-                className="block w-full px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors text-center"
-              >
-                Health Check
-              </Link>
-              <Link
-                to="/reports"
-                className="block w-full px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors text-center"
-              >
-                View Reports
-              </Link>
-              <Link
-                to="/livestock"
-                className="block w-full px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition-colors text-center"
-              >
-                Search
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Livestock Chart */}
-      <div className="grid grid-cols-1 gap-4">
-        {/* Livestock Chart */}
-        <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border border-slate-200 shadow-sm">
-          <div className="px-5 py-4 border-b border-slate-200 bg-white/50 backdrop-blur-sm">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-900">Livestock Distribution</h3>
-              <select className="text-xs border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100">
-                <option>This Month</option>
-                <option>Last 3 Months</option>
-                <option>This Year</option>
-              </select>
-            </div>
-          </div>
-          <div className="p-6">
-            {/* Pie Chart */}
-            <div className="flex flex-col items-center mb-8">
-              <div className="relative mb-3">
-                <svg viewBox="0 0 200 200" className="w-56 h-56 drop-shadow-lg">
+            <div className="p-4">
+              {/* Pie Chart */}
+              <div className="flex flex-col items-center mb-4">
+                <svg viewBox="0 0 200 200" className="w-32 h-32 drop-shadow-md mb-2">
                   {/* Cattle - 37% - Blue */}
                   <circle
                     cx="100"
@@ -510,79 +412,198 @@ export default function Dashboard() {
                   {/* Center circle for donut effect */}
                   <circle cx="100" cy="100" r="60" fill="white" />
                   {/* Center number */}
-                  <text x="100" y="110" textAnchor="middle" className="text-4xl fill-slate-900 font-bold">
+                  <text x="100" y="110" textAnchor="middle" className="text-2xl fill-slate-900 font-bold">
                     67
                   </text>
                 </svg>
+                <p className="text-xs text-slate-500 font-medium">Total Animals</p>
               </div>
-              {/* Total Animals Label */}
-              <p className="text-sm text-slate-500 font-medium">Total Animals</p>
-            </div>
 
-            {/* Legend with Cards */}
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="bg-white rounded-lg p-3 border border-blue-100 hover:shadow-md transition-shadow">
-                <div className="flex items-center space-x-2 mb-2">
-                  <div className="w-3 h-3 rounded-full bg-blue-500 shadow-sm"></div>
-                  <span className="text-xs font-medium text-slate-600">Cattle</span>
+              {/* Legend with Cards */}
+              <div className="space-y-2">
+                <div className="bg-white rounded-lg p-2.5 border border-blue-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+                      <span className="text-xs font-medium text-slate-600">Cattle</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-slate-900">25</div>
+                      <div className="text-xs text-slate-500">37%</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-slate-900">25</div>
-                <div className="text-xs text-slate-500 mt-1">37% of total</div>
-              </div>
-              
-              <div className="bg-white rounded-lg p-3 border border-orange-100 hover:shadow-md transition-shadow">
-                <div className="flex items-center space-x-2 mb-2">
-                  <div className="w-3 h-3 rounded-full bg-orange-500 shadow-sm"></div>
-                  <span className="text-xs font-medium text-slate-600">Goats</span>
+                
+                <div className="bg-white rounded-lg p-2.5 border border-orange-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div>
+                      <span className="text-xs font-medium text-slate-600">Goats</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-slate-900">26</div>
+                      <div className="text-xs text-slate-500">39%</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-slate-900">26</div>
-                <div className="text-xs text-slate-500 mt-1">39% of total</div>
-              </div>
-              
-              <div className="bg-white rounded-lg p-3 border border-purple-100 hover:shadow-md transition-shadow">
-                <div className="flex items-center space-x-2 mb-2">
-                  <div className="w-3 h-3 rounded-full bg-purple-500 shadow-sm"></div>
-                  <span className="text-xs font-medium text-slate-600">Sheep</span>
+                
+                <div className="bg-white rounded-lg p-2.5 border border-purple-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
+                      <span className="text-xs font-medium text-slate-600">Sheep</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-slate-900">16</div>
+                      <div className="text-xs text-slate-500">24%</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-slate-900">16</div>
-                <div className="text-xs text-slate-500 mt-1">24% of total</div>
               </div>
             </div>
-            
-            <div className="flex items-center justify-center pt-4 border-t border-slate-200/50">
-              <div className="flex items-center space-x-2 px-3 py-1.5 bg-emerald-50 rounded-full">
-                <TrendingUp size={14} className="text-emerald-600" />
-                <span className="text-xs font-medium text-emerald-700">10.2% growth from last month</span>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+            <div className="px-5 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+              <h3 className="text-sm font-bold text-slate-900">Quick Actions</h3>
+            </div>
+            <div className="p-4 space-y-2">
+              <Link
+                to="/livestock/add"
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white text-sm font-bold rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all shadow-md hover:shadow-lg"
+              >
+                <Plus size={18} />
+                <span>Add Animal</span>
+              </Link>
+              <Link
+                to="/vaccination"
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-white border-2 border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all"
+              >
+                <HeartPulse size={18} />
+                <span>Health Check</span>
+              </Link>
+              <Link
+                to="/reports"
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-white border-2 border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all"
+              >
+                <TrendingUp size={18} />
+                <span>View Reports</span>
+              </Link>
+              <Link
+                to="/livestock"
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-white border-2 border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all"
+              >
+                <Beef size={18} />
+                <span>Browse Livestock</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Alerts - Takes 2 columns */}
+        {/* Recent Alerts - Takes 2 columns */}
+        <div className="xl:col-span-2">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+            <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
+                  <AlertCircle size={20} className="text-slate-700" />
+                  <span>Priority Alerts</span>
+                </h3>
+                <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full shadow-sm">
+                  4 pending
+                </span>
               </div>
+            </div>
+            <div className="p-3 space-y-1">
+              <Link
+                to="/pregnancy"
+                className="group flex items-start space-x-3 p-4 hover:bg-slate-50 rounded-lg transition-all cursor-pointer border-l-2 border-transparent hover:border-primary-400"
+              >
+                <div className="flex-shrink-0 bg-amber-50 w-6 h-6 rounded flex items-center justify-center mt-0.5">
+                  <AlertTriangle size={14} className="text-amber-700" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-900">3-Month Pregnancy Check: Cow C-011 bred on Sep 15 - Check due by Dec 15</p>
+                  <p className="text-xs text-slate-500 mt-0.5">23 days</p>
+                </div>
+                <span className="flex-shrink-0 text-xs font-medium text-slate-600 group-hover:text-slate-900">
+                  →
+                </span>
+              </Link>
+              <Link
+                to="/pregnancy"
+                className="group flex items-start space-x-3 p-4 hover:bg-slate-50 rounded-lg transition-all cursor-pointer border-l-2 border-transparent hover:border-primary-400"
+              >
+                <div className="flex-shrink-0 bg-amber-50 w-6 h-6 rounded flex items-center justify-center mt-0.5">
+                  <AlertTriangle size={14} className="text-amber-700" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-900">3-Month Pregnancy Check: Cow C-023 bred on Oct 5 - Check overdue</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Overdue</p>
+                </div>
+                <span className="flex-shrink-0 text-xs font-medium text-slate-600 group-hover:text-slate-900">
+                  →
+                </span>
+              </Link>
+              <AlertItem
+                type="warning"
+                message="Rabies vaccine overdue for Boer Doe G-012"
+                timestamp="Overdue"
+                animalId="G-012"
+              />
+              <AlertItem
+                type="info"
+                message="CDT vaccine due for Dorper Ewe S-005 on Dec 8"
+                timestamp="16 days"
+                animalId="S-005"
+              />
+              <AlertItem
+                type="success"
+                message="Withdrawal period ends today: Brahman Bull C-008 can be cleared for sale"
+                timestamp="Today"
+                animalId="C-008"
+              />
+            </div>
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50">
+              <Link
+                to="/alerts"
+                className="text-sm font-bold text-primary-600 hover:text-primary-700 flex items-center space-x-2 group"
+              >
+                <span>View all alerts</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
       {/* Activity Logs */}
-      <div className="bg-white rounded-lg border border-slate-200">
-        <div className="px-5 py-4 border-b border-slate-200">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-slate-600" />
-              <h3 className="text-sm font-semibold text-slate-900">Recent Activity</h3>
+              <Activity className="w-5 h-5 text-slate-700" />
+              <h3 className="text-base font-bold text-slate-900">Recent Activity</h3>
             </div>
-            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-medium rounded">
-              {activityLogs.length}
+            <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full shadow-sm">
+              {activityLogs.length} events
             </span>
           </div>
         </div>
-        <div className="p-2 space-y-1 max-h-96 overflow-y-auto scrollbar-thin">
+        <div className="p-3 space-y-1 max-h-[500px] overflow-y-auto">
           {activityLogs.map((log, index) => (
             <ActivityLogItem key={index} {...log} />
           ))}
         </div>
-        <div className="px-5 py-3 border-t border-slate-200">
+        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50">
           <Link
             to="/activity"
-            className="text-xs font-medium text-slate-600 hover:text-slate-900"
+            className="text-sm font-bold text-primary-600 hover:text-primary-700 flex items-center space-x-2 group"
           >
-            View all activity →
+            <span>View complete activity log</span>
+            <span className="group-hover:translate-x-1 transition-transform">→</span>
           </Link>
         </div>
       </div>

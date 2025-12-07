@@ -410,19 +410,19 @@ export default function Pregnancy() {
       {/* Summary Cards - Simplified */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total Confirmed Pregnancies */}
-        <div className="bg-gradient-to-br from-primary-50 to-purple-50 rounded-lg border border-primary-200 p-6">
+        <div className="bg-gradient-to-br from-primary-50 to-purple-50 rounded-lg border border-primary-200 p-4">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
-                <Heart className="text-primary-600" size={20} />
-                <p className="text-sm font-medium text-slate-700">Total Confirmed</p>
+                <Heart className="text-primary-600" size={16} />
+                <p className="text-xs font-semibold text-slate-700">Total Confirmed</p>
               </div>
-              <p className="text-3xl font-bold text-slate-900 mt-2">{totalPregnancies}</p>
-              <p className="text-xs text-slate-600 mt-2">90+ days pregnant</p>
+              <p className="text-2xl font-bold text-slate-900 mt-1">{totalPregnancies}</p>
+              <p className="text-xs text-slate-600 mt-1">90+ days pregnant</p>
             </div>
           </div>
           {/* Stage Breakdown */}
-          <div className="mt-4 pt-4 border-t border-primary-200 flex items-center justify-between text-xs">
+          <div className="mt-3 pt-3 border-t border-primary-200 flex items-center justify-between text-xs">
             <div className="text-center">
               <p className="text-slate-600">Early</p>
               <p className="font-bold text-blue-600">{earlyStage}</p>
@@ -439,34 +439,34 @@ export default function Pregnancy() {
         </div>
 
         {/* Due This Month */}
-        <div className="bg-white rounded-lg border border-slate-200 p-6 hover:border-purple-300 transition-colors">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-3 bg-purple-50 rounded-lg">
-              <Calendar className="text-purple-600" size={24} />
+        <div className="bg-white rounded-lg border border-slate-200 p-4 hover:border-purple-300 transition-colors">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 bg-purple-50 rounded-lg">
+              <Calendar className="text-purple-600" size={18} />
             </div>
-            <span className="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-bold rounded-full">
+            <span className="px-2 py-0.5 bg-purple-100 text-purple-800 text-xs font-bold rounded-full">
               URGENT
             </span>
           </div>
-          <p className="text-sm text-slate-600 mb-1">Due This Month</p>
-          <p className="text-3xl font-bold text-purple-600 mb-2">{dueThisMonth}</p>
+          <p className="text-xs text-slate-600 mb-1">Due This Month</p>
+          <p className="text-2xl font-bold text-purple-600 mb-1">{dueThisMonth}</p>
           <p className="text-xs text-slate-500">Expected births in December</p>
         </div>
 
         {/* Need Attention */}
-        <div className="bg-white rounded-lg border border-slate-200 p-6 hover:border-red-300 transition-colors">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-3 bg-red-50 rounded-lg">
-              <AlertCircle className="text-red-600" size={24} />
+        <div className="bg-white rounded-lg border border-slate-200 p-4 hover:border-red-300 transition-colors">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 bg-red-50 rounded-lg">
+              <AlertCircle className="text-red-600" size={18} />
             </div>
             {(needsAttention + overdue) > 0 && (
-              <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full animate-pulse">
+              <span className="px-2 py-0.5 bg-red-100 text-red-800 text-xs font-bold rounded-full animate-pulse">
                 ACTION NEEDED
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-600 mb-1">Need Attention</p>
-          <p className="text-3xl font-bold text-red-600 mb-2">{needsAttention + overdue}</p>
+          <p className="text-xs text-slate-600 mb-1">Need Attention</p>
+          <p className="text-2xl font-bold text-red-600 mb-1">{needsAttention + overdue}</p>
           <p className="text-xs text-slate-500">
             {overdue > 0 ? `${overdue} overdue, ` : ''}{needsAttention} health concerns
           </p>
