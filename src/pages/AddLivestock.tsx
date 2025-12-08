@@ -15,6 +15,38 @@ export default function AddLivestock() {
   const [hasBred, setHasBred] = React.useState(false);
   const [calculatedCategory, setCalculatedCategory] = React.useState<string>('');
   const [showParentDetails, setShowParentDetails] = React.useState(true); // Toggle for parent details
+
+  // Function to generate unique livestock ID based on species
+  const generateLivestockId = (species: string): string => {
+    let prefix = '';
+    switch (species) {
+      case 'Cattle':
+        prefix = 'C';
+        break;
+      case 'Goat':
+        prefix = 'G';
+        break;
+      case 'Sheep':
+        prefix = 'S';
+        break;
+      default:
+        prefix = 'L'; // Fallback to 'L' for Livestock
+    }
+
+    // Find the highest existing number for this species
+    const existingIds = livestock
+      .filter(animal => animal.livestockId && animal.livestockId.startsWith(prefix + '-'))
+      .map(animal => {
+        const match = animal.livestockId.match(/^[A-Z]-(\d+)$/);
+        return match ? parseInt(match[1], 10) : 0;
+      });
+
+    const maxNumber = existingIds.length > 0 ? Math.max(...existingIds) : 0;
+    const nextNumber = maxNumber + 1;
+
+    // Format with leading zeros (3 digits)
+    return `${prefix}-${String(nextNumber).padStart(3, '0')}`;
+  };
   
   // Breed data - Common Philippine breeds organized by species
   const [breedsBySpecies, setBreedsBySpecies] = React.useState({
@@ -92,11 +124,13 @@ export default function AddLivestock() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
-    // Reset breed when species changes
+    // Reset breed and auto-generate ID when species changes
     if (name === 'species') {
+      const newLivestockId = generateLivestockId(value);
       setFormData({
         ...formData,
         [name]: value,
+        livestockId: newLivestockId, // Auto-generate ID based on species
         breed: '', // Clear breed selection when species changes
         damId: '', // Clear dam/sire when species changes
         sireId: ''
@@ -169,7 +203,7 @@ export default function AddLivestock() {
       category: formData.category as any, // Category union type
       sex: formData.sex as 'Male' | 'Female',
       dateOfBirth: formData.dateOfBirth,
-      birthWeight: parseFloat(formData.birthWeight),
+      birthWeight: formData.birthWeight ? parseFloat(formData.birthWeight) : undefined,
       currentWeight: parseFloat(formData.currentWeight),
       colorMarkings: formData.colorMarkings,
       status: formData.status as 'Active' | 'Sold' | 'Culled' | 'Deceased',
@@ -225,34 +259,6 @@ export default function AddLivestock() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Newborn/Mature Toggle - Prominent Card */}
-        <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border-2 border-emerald-200 p-5">
-          <div className="flex items-start space-x-3">
-            <input
-              type="checkbox"
-              id="newbornToggle"
-              checked={isNewborn}
-              onChange={handleNewbornToggle}
-              className="w-5 h-5 mt-0.5 text-emerald-600 border-emerald-300 rounded focus:ring-2 focus:ring-emerald-500"
-            />
-            <div className="flex-1">
-              <label htmlFor="newbornToggle" className="cursor-pointer">
-                <div className="flex items-center space-x-2">
-                  <span className="text-base font-semibold text-emerald-900">This is a newborn</span>
-                  {isNewborn && (
-                    <span className="px-2 py-0.5 bg-emerald-600 text-white text-xs font-medium rounded-full">Active</span>
-                  )}
-                </div>
-                <p className="text-sm text-emerald-700 mt-1">
-                  {isNewborn 
-                    ? 'Newborn mode: Enter dam/sire info, birth date, and health assessment' 
-                    : 'Check this box if registering a newborn kid/lamb/calf (will auto-assign category)'}
-                </p>
-              </label>
-            </div>
-          </div>
-        </div>
-
         {/* Section 1: Livestock Basic Information */}
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm">
           <div className="bg-slate-50 px-6 py-4 border-b border-slate-200">
@@ -269,11 +275,13 @@ export default function AddLivestock() {
                   type="text"
                   name="livestockId"
                   value={formData.livestockId}
-                  onChange={handleInputChange}
-                  placeholder="A-001"
+                  readOnly
+                  placeholder="Select species to generate ID"
                   required
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-600 cursor-not-allowed focus:outline-none"
+                  title="Livestock ID is auto-generated based on species (C-### for Cattle, G-### for Goat, S-### for Sheep)"
                 />
+                <p className="text-xs text-slate-500 mt-1">Auto-generated based on species</p>
               </div>
 
               <div>
@@ -578,7 +586,7 @@ export default function AddLivestock() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Birth Weight (kg) <span className="text-red-500">*</span>
+                    Birth Weight (kg) <span className="text-xs text-slate-500">(Optional)</span>
                   </label>
                   <input
                     type="number"
@@ -587,7 +595,6 @@ export default function AddLivestock() {
                     onChange={handleInputChange}
                     placeholder="35.5"
                     step="0.1"
-                    required
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
@@ -784,6 +791,31 @@ export default function AddLivestock() {
                   step="0.01"
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
+              </div>
+
+              {/* Quarantine Notice */}
+              <div className="md:col-span-2 mt-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold text-amber-900 mb-1">⚠️ Quarantine Required</h4>
+                      <p className="text-sm text-amber-800">
+                        <strong>Important:</strong> Livestock purchased from external sources must be quarantined for a minimum of <strong>30 days</strong> before integration with the existing herd. This quarantine period helps prevent disease transmission and allows for health monitoring and necessary treatments.
+                      </p>
+                      <ul className="mt-2 ml-4 text-xs text-amber-700 list-disc space-y-1">
+                        <li>Isolate the animal in a separate facility</li>
+                        <li>Monitor for signs of disease daily</li>
+                        <li>Complete necessary vaccinations and treatments</li>
+                        <li>Conduct health assessment before integration</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           ) : (

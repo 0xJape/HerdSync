@@ -597,8 +597,9 @@ export default function Pregnancy() {
                   <tr key={pregnancy.id} className="hover:bg-primary-50 transition-colors group">
                     <td className="px-5 py-4">
                       <div>
-                        <div className="text-sm font-bold text-slate-900">{pregnancy.damId}</div>
-                        <div className="text-xs text-slate-600 mt-0.5">{pregnancy.damBreed}</div>
+                        <div className="text-base font-bold text-slate-900">{pregnancy.damId}</div>
+                        <div className="text-sm text-slate-600 mt-1">{pregnancy.damName}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">{pregnancy.damBreed}</div>
                       </div>
                     </td>
                     <td className="px-5 py-4">
@@ -740,8 +741,8 @@ export default function Pregnancy() {
                     </td>
                     <td className="px-5 py-4">
                       <div>
-                        <p className="font-bold text-slate-900 text-sm">{newborn.damId}</p>
-                        <p className="text-xs text-slate-600 mt-0.5">{newborn.damName}</p>
+                        <p className="font-bold text-slate-900 text-base">{newborn.damId}</p>
+                        <p className="text-sm text-slate-600 mt-1">{newborn.damName}</p>
                       </div>
                     </td>
                     <td className="px-5 py-4">

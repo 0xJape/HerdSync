@@ -350,7 +350,7 @@ export default function Dashboard() {
         <StatCard
           title="Active Breeding"
           value="8"
-          change="1.1%"
+          change="20%"
           changeType="positive"
           icon={Users}
           iconBg="bg-blue-100"
@@ -359,8 +359,45 @@ export default function Dashboard() {
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        {/* Left Column - Chart and Quick Actions */}
+        {/* Left Column - Quick Actions and Chart */}
         <div className="xl:col-span-1 space-y-5">
+          {/* Quick Actions */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+            <div className="px-5 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+              <h3 className="text-sm font-bold text-slate-900">Quick Actions</h3>
+            </div>
+            <div className="p-4 space-y-2">
+              <Link
+                to="/livestock/add"
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white text-sm font-bold rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all shadow-md hover:shadow-lg"
+              >
+                <Plus size={18} />
+                <span>Add Animal</span>
+              </Link>
+              <Link
+                to="/vaccination"
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-white border-2 border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all"
+              >
+                <HeartPulse size={18} />
+                <span>Health Check</span>
+              </Link>
+              <Link
+                to="/reports"
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-white border-2 border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all"
+              >
+                <TrendingUp size={18} />
+                <span>View Reports</span>
+              </Link>
+              <Link
+                to="/livestock"
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-white border-2 border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all"
+              >
+                <Beef size={18} />
+                <span>Browse Livestock</span>
+              </Link>
+            </div>
+          </div>
+
           {/* Livestock Distribution Chart */}
           <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border border-slate-200 shadow-sm">
             <div className="px-4 py-3 border-b border-slate-200 bg-white/70 backdrop-blur-sm">
@@ -462,43 +499,6 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
-            <div className="px-5 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
-              <h3 className="text-sm font-bold text-slate-900">Quick Actions</h3>
-            </div>
-            <div className="p-4 space-y-2">
-              <Link
-                to="/livestock/add"
-                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white text-sm font-bold rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all shadow-md hover:shadow-lg"
-              >
-                <Plus size={18} />
-                <span>Add Animal</span>
-              </Link>
-              <Link
-                to="/vaccination"
-                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-white border-2 border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all"
-              >
-                <HeartPulse size={18} />
-                <span>Health Check</span>
-              </Link>
-              <Link
-                to="/reports"
-                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-white border-2 border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all"
-              >
-                <TrendingUp size={18} />
-                <span>View Reports</span>
-              </Link>
-              <Link
-                to="/livestock"
-                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-white border-2 border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-all"
-              >
-                <Beef size={18} />
-                <span>Browse Livestock</span>
-              </Link>
-            </div>
-          </div>
         </div>
 
         {/* Recent Alerts - Takes 2 columns */}
@@ -574,6 +574,127 @@ export default function Dashboard() {
                 <span>View all alerts</span>
                 <span className="group-hover:translate-x-1 transition-transform">→</span>
               </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Livestock Population Trend Chart */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-slate-700" />
+              <h3 className="text-base font-bold text-slate-900">Livestock Population Trend</h3>
+            </div>
+            <select className="text-xs border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:border-primary-400 font-medium">
+              <option>Last 6 Months</option>
+              <option>Last Year</option>
+              <option>All Time</option>
+            </select>
+          </div>
+        </div>
+        <div className="p-6">
+          {/* Line Chart */}
+          <div className="relative h-64">
+            {/* Y-axis labels */}
+            <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-slate-500 font-medium pr-2">
+              <span>70</span>
+              <span>60</span>
+              <span>50</span>
+              <span>40</span>
+              <span>30</span>
+              <span>20</span>
+            </div>
+            
+            {/* Chart area */}
+            <div className="ml-8 h-full relative">
+              {/* Grid lines */}
+              <div className="absolute inset-0 flex flex-col justify-between">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="border-t border-slate-100"></div>
+                ))}
+              </div>
+              
+              {/* SVG Chart */}
+              <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+                {/* Area fill - Gradient */}
+                <defs>
+                  <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.02" />
+                  </linearGradient>
+                </defs>
+                
+                {/* Area under line */}
+                <path
+                  d="M 0,230 L 0,200 L 16.67,180 L 33.33,170 L 50,150 L 66.67,140 L 83.33,100 L 100,100 V 256 H 0 Z"
+                  fill="url(#areaGradient)"
+                />
+                
+                {/* Main line - Total */}
+                <path
+                  d="M 0,200 L 16.67,180 L 33.33,170 L 50,150 L 66.67,140 L 83.33,100 L 100,100"
+                  fill="none"
+                  stroke="#3b82f6"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                />
+                
+                {/* Data points */}
+                <circle cx="0%" cy="78%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
+                <circle cx="16.67%" cy="70%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
+                <circle cx="33.33%" cy="66%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
+                <circle cx="50%" cy="58%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
+                <circle cx="66.67%" cy="55%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
+                <circle cx="83.33%" cy="39%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
+                <circle cx="100%" cy="39%" r="5" fill="#3b82f6" stroke="white" strokeWidth="2" />
+              </svg>
+              
+              {/* X-axis labels */}
+              <div className="absolute -bottom-6 left-0 right-0 flex justify-between text-xs text-slate-500 font-medium">
+                <span>Jul</span>
+                <span>Aug</span>
+                <span>Sep</span>
+                <span>Oct</span>
+                <span>Nov</span>
+                <span>Dec</span>
+                <span className="font-bold text-primary-600">Jan</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Legend and Stats */}
+          <div className="mt-10 pt-5 border-t border-slate-200">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="flex items-center justify-center space-x-2 mb-1">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-xs font-medium text-slate-600">Total Animals</span>
+                </div>
+                <p className="text-2xl font-bold text-slate-900">67</p>
+                <p className="text-xs text-emerald-600 font-medium mt-1">↑ 10.2% growth</p>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-xs font-medium text-slate-600 mb-1">New Births</p>
+                <p className="text-2xl font-bold text-slate-900">8</p>
+                <p className="text-xs text-slate-500 mt-1">This month</p>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-xs font-medium text-slate-600 mb-1">Purchases</p>
+                <p className="text-2xl font-bold text-slate-900">3</p>
+                <p className="text-xs text-slate-500 mt-1">This month</p>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-xs font-medium text-slate-600 mb-1">Sales/Deaths</p>
+                <p className="text-2xl font-bold text-slate-900">2</p>
+                <p className="text-xs text-slate-500 mt-1">This month</p>
+              </div>
             </div>
           </div>
         </div>

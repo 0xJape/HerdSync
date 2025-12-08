@@ -168,7 +168,7 @@ const mockAnimalData = {
 
 export default function LivestockProfile() {
   const { id } = useParams<{ id: string }>();
-  const { userRole } = useStore();
+  const { userRole, livestock } = useStore();
   const isViewer = userRole === 'viewer';
   const animal = mockAnimalData[id as keyof typeof mockAnimalData];
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
@@ -356,23 +356,289 @@ export default function LivestockProfile() {
   // Get available breeds based on selected species
   const availableBreeds = editFormData.species ? breedsBySpecies[editFormData.species as keyof typeof breedsBySpecies] || [] : [];
 
-  const handleExportProfile = () => {
+  const handleExportBreedingHistory = () => {
     if (!animal) return;
-    
-    // Create printable HTML content focused on vaccination history
+
     const htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
-        <title>Livestock Vaccination Record - ${animal.livestockId}</title>
+        <title>Breeding History - ${animal.livestockId}</title>
         <style>
           @page { margin: 2cm; }
           body { 
             font-family: Arial, sans-serif; 
             line-height: 1.6; 
             color: #333;
-            max-width: 800px;
+            max-width: 900px;
+            margin: 0 auto;
+          }
+          .header {
+            text-align: center;
+            border-bottom: 3px solid #9333ea;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .header h1 {
+            color: #9333ea;
+            margin: 0 0 5px 0;
+            font-size: 24px;
+          }
+          .header p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 12px;
+          }
+          .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #faf5ff;
+            border: 2px solid #9333ea;
+            border-radius: 8px;
+          }
+          .summary-item {
+            text-align: center;
+          }
+          .summary-label {
+            font-size: 11px;
+            color: #7c3aed;
+            font-weight: bold;
+            text-transform: uppercase;
+          }
+          .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #9333ea;
+            margin-top: 5px;
+          }
+          .section {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+            border: 2px solid #e5e7eb;
+            padding: 20px;
+            border-radius: 8px;
+          }
+          .section-header {
+            background: #9333ea;
+            color: white;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            margin: -20px -20px 15px -20px;
+            border-radius: 6px 6px 0 0;
+          }
+          .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+          }
+          .info-item {
+            padding: 8px;
+            background: #f9fafb;
+            border-left: 3px solid #9333ea;
+          }
+          .info-label {
+            font-weight: bold;
+            color: #9333ea;
+            font-size: 11px;
+            text-transform: uppercase;
+          }
+          .info-value {
+            color: #333;
+            font-size: 13px;
+            margin-top: 3px;
+          }
+          .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+          }
+          .badge-success { background: #d1fae5; color: #065f46; }
+          .badge-warning { background: #fef3c7; color: #92400e; }
+          .badge-error { background: #fee2e2; color: #991b1b; }
+          .calves-list {
+            margin-top: 10px;
+            padding-left: 20px;
+          }
+          .calf-item {
+            padding: 5px 0;
+            border-bottom: 1px dotted #e5e7eb;
+          }
+          .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+            text-align: center;
+            color: #666;
+            font-size: 11px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>🐄 Breeding History Report</h1>
+          <p><strong>Livestock ID:</strong> ${animal.livestockId} | <strong>Name:</strong> ${animal.breed} ${animal.category}</p>
+          <p><strong>Species:</strong> ${animal.species} | <strong>Sex:</strong> ${animal.sex} | <strong>Current Status:</strong> ${animal.breedingStatus}</p>
+          <p><strong>Generated:</strong> ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="summary-label">Total Breedings</div>
+            <div class="summary-value">${animal.breedingHistory.length}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Total Calves</div>
+            <div class="summary-value">${animal.breedingHistory.reduce((sum, r) => sum + r.numberOfCalves, 0)}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Successful</div>
+            <div class="summary-value" style="color: #10b981;">${animal.breedingHistory.filter(r => r.calvingResult === 'Success').length}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Success Rate</div>
+            <div class="summary-value">${animal.breedingHistory.length > 0 ? Math.round((animal.breedingHistory.filter(r => r.calvingResult === 'Success').length / animal.breedingHistory.length) * 100) : 0}%</div>
+          </div>
+        </div>
+
+        ${animal.breedingHistory.map((record, index) => `
+          <div class="section">
+            <div class="section-header">
+              Breeding Record #${animal.breedingHistory.length - index} - ${new Date(record.breedingDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </div>
+            
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Breeding Date</div>
+                <div class="info-value">${new Date(record.breedingDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Breeding Method</div>
+                <div class="info-value">${record.breedingMethod}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Bull/Sire ID</div>
+                <div class="info-value">${record.bullId || record.sireId || 'N/A'}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Bull/Sire Breed</div>
+                <div class="info-value">${record.bullBreed || record.sireBreed || 'N/A'}</div>
+              </div>
+              ${record.expectedDueDate ? `
+                <div class="info-item">
+                  <div class="info-label">Expected Due Date</div>
+                  <div class="info-value">${new Date(record.expectedDueDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>
+                </div>
+              ` : ''}
+              ${record.calvingDate ? `
+                <div class="info-item">
+                  <div class="info-label">Calving Date</div>
+                  <div class="info-value">${new Date(record.calvingDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>
+                </div>
+              ` : ''}
+              <div class="info-item">
+                <div class="info-label">Calving Result</div>
+                <div class="info-value">
+                  <span class="badge ${record.calvingResult === 'Success' ? 'badge-success' : record.calvingResult === 'Stillborn' ? 'badge-error' : 'badge-warning'}">${record.calvingResult || 'Pending'}</span>
+                </div>
+              </div>
+              ${record.bodyConditionScore ? `
+                <div class="info-item">
+                  <div class="info-label">Body Condition Score</div>
+                  <div class="info-value">${record.bodyConditionScore}/5</div>
+                </div>
+              ` : ''}
+              <div class="info-item">
+                <div class="info-label">Number of Calves</div>
+                <div class="info-value">${record.numberOfCalves || 0}</div>
+              </div>
+            </div>
+
+            ${record.numberOfCalves > 0 && record.calves && record.calves.length > 0 ? `
+              <div style="margin-top: 15px; padding: 15px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px;">
+                <strong style="color: #16a34a; font-size: 12px; display: block; margin-bottom: 10px;">🐮 CALVES (${record.numberOfCalves}):</strong>
+                <div class="calves-list">
+                  ${record.calves.map(calf => `
+                    <div class="calf-item" style="padding: 8px; background: white; margin-bottom: 5px; border-radius: 4px;">
+                      <div style="font-weight: bold; color: #16a34a; margin-bottom: 4px;">${calf.calfId}</div>
+                      <div style="font-size: 11px; color: #555;">
+                        <strong>Sex:</strong> ${calf.sex} | 
+                        <strong>Birth Weight:</strong> ${calf.birthWeight}kg | 
+                        <strong>Vigor:</strong> ${calf.calfVigor} | 
+                        <strong>Status:</strong> ${calf.status}
+                      </div>
+                      ${calf.calvingProblem && calf.calvingProblem !== 'None' ? `
+                        <div style="font-size: 11px; color: #dc2626; margin-top: 4px;">
+                          <strong>Problem:</strong> ${calf.calvingProblem}
+                        </div>
+                      ` : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            ${record.complications ? `
+              <div style="margin-top: 15px; padding: 10px; background: #fef3c7; border-left: 3px solid #f59e0b;">
+                <strong style="color: #92400e; font-size: 11px;">⚠️ COMPLICATIONS:</strong>
+                <p style="margin: 5px 0 0 0; color: #78350f; font-size: 12px;">${record.complications}</p>
+              </div>
+            ` : ''}
+
+            ${record.notes ? `
+              <div style="margin-top: 15px;">
+                <strong style="color: #9333ea; font-size: 11px;">NOTES:</strong>
+                <p style="margin: 5px 0 0 0; color: #555; font-size: 12px;">${record.notes}</p>
+              </div>
+            ` : ''}
+          </div>
+        `).join('')}
+
+        <div class="footer">
+          <p><strong>DigiFarm Livestock Management System</strong></p>
+          <p>This report was automatically generated on ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+      }, 500);
+    } else {
+      alert('Please allow popups for this site to export the breeding history.');
+    }
+  };
+
+  const handleExportProfile = () => {
+    if (!animal) return;
+    
+    // Create comprehensive livestock profile report
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Livestock Profile - ${animal.livestockId}</title>
+        <style>
+          @page { margin: 2cm; }
+          body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            color: #333;
+            max-width: 900px;
             margin: 0 auto;
           }
           .header {
@@ -384,7 +650,7 @@ export default function LivestockProfile() {
           .header h1 {
             color: #059669;
             margin: 0 0 5px 0;
-            font-size: 24px;
+            font-size: 26px;
           }
           .header p {
             margin: 5px 0;
@@ -402,6 +668,7 @@ export default function LivestockProfile() {
             font-size: 16px;
             font-weight: bold;
             margin-bottom: 15px;
+            border-radius: 4px;
           }
           .info-grid {
             display: grid;
@@ -410,95 +677,67 @@ export default function LivestockProfile() {
             margin-bottom: 20px;
           }
           .info-item {
-            padding: 8px;
+            padding: 10px;
             background: #f9fafb;
             border-left: 3px solid #059669;
+            border-radius: 4px;
           }
           .info-label {
             font-weight: bold;
             color: #059669;
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
           }
           .info-value {
             color: #333;
             font-size: 14px;
+            margin-top: 4px;
           }
-          .vaccine-table {
+          .table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
           }
-          .vaccine-table th {
+          .table th {
             background: #059669;
             color: white;
-            padding: 12px;
+            padding: 10px;
             text-align: left;
-            font-size: 13px;
+            font-size: 12px;
           }
-          .vaccine-table td {
-            padding: 12px;
+          .table td {
+            padding: 10px;
             border-bottom: 1px solid #e5e7eb;
-            font-size: 13px;
+            font-size: 12px;
           }
-          .vaccine-table tr:nth-child(even) {
+          .table tr:nth-child(even) {
             background: #f9fafb;
           }
-          .vaccine-detail {
+          .record-card {
             background: white;
-            border: 1px solid #e5e7eb;
+            border: 2px solid #e5e7eb;
             padding: 15px;
             margin-bottom: 15px;
+            border-radius: 6px;
             page-break-inside: avoid;
           }
-          .vaccine-detail h3 {
+          .record-card h3 {
             color: #059669;
             margin: 0 0 10px 0;
-            font-size: 16px;
+            font-size: 15px;
             border-bottom: 2px solid #059669;
             padding-bottom: 5px;
           }
-          .vaccine-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-          }
-          .vaccine-info-item {
-            font-size: 13px;
-          }
-          .vaccine-info-item strong {
-            color: #059669;
-            display: block;
-            margin-bottom: 3px;
-          }
-          .activity-item {
-            padding: 12px;
-            border-left: 3px solid #059669;
-            background: #f9fafb;
-            margin-bottom: 10px;
-            page-break-inside: avoid;
-          }
-          .activity-date {
-            color: #059669;
+          .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
             font-weight: bold;
-            font-size: 13px;
           }
-          .activity-type {
-            font-weight: bold;
-            color: #333;
-            font-size: 14px;
-            margin: 5px 0;
-          }
-          .activity-desc {
-            color: #666;
-            font-size: 13px;
-            margin: 5px 0;
-          }
-          .activity-by {
-            color: #666;
-            font-size: 12px;
-            font-style: italic;
-          }
+          .badge-active { background: #d1fae5; color: #065f46; }
+          .badge-healthy { background: #dbeafe; color: #1e40af; }
+          .badge-warning { background: #fef3c7; color: #92400e; }
           .footer {
             margin-top: 40px;
             padding-top: 20px;
@@ -507,16 +746,12 @@ export default function LivestockProfile() {
             color: #666;
             font-size: 11px;
           }
-          .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-          }
-          .status-healthy {
-            background: #d1fae5;
-            color: #065f46;
+          .weight-history {
+            background: #f0fdf4;
+            padding: 12px;
+            border-left: 3px solid #10b981;
+            margin-bottom: 10px;
+            border-radius: 4px;
           }
           @media print {
             body { margin: 0; }
@@ -525,9 +760,9 @@ export default function LivestockProfile() {
       </head>
       <body>
         <div class="header">
-          <h1>LIVESTOCK VACCINATION & HEALTH RECORD</h1>
-          <p><strong>Livestock ID:</strong> ${animal.livestockId}</p>
-          <p>Generated on ${new Date().toLocaleString('en-US', { 
+          <h1>🐄 LIVESTOCK PROFILE & HEALTH RECORD</h1>
+          <p><strong>Livestock ID:</strong> ${animal.livestockId} | <strong>Name:</strong> ${animal.breed} ${animal.category}</p>
+          <p><strong>Generated:</strong> ${new Date().toLocaleString('en-US', { 
             year: 'numeric', 
             month: 'long', 
             day: 'numeric',
@@ -536,9 +771,14 @@ export default function LivestockProfile() {
           })}</p>
         </div>
 
+        <!-- Basic Information -->
         <div class="section">
-          <div class="section-title">Basic Information</div>
+          <div class="section-title">📋 Basic Information</div>
           <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Livestock ID</div>
+              <div class="info-value">${animal.livestockId}</div>
+            </div>
             <div class="info-item">
               <div class="info-label">Species</div>
               <div class="info-value">${animal.species}</div>
@@ -548,95 +788,209 @@ export default function LivestockProfile() {
               <div class="info-value">${animal.breed}</div>
             </div>
             <div class="info-item">
+              <div class="info-label">Category</div>
+              <div class="info-value">${animal.category}</div>
+            </div>
+            <div class="info-item">
               <div class="info-label">Sex</div>
               <div class="info-value">${animal.sex}</div>
             </div>
             <div class="info-item">
               <div class="info-label">Date of Birth</div>
-              <div class="info-value">${animal.dateOfBirth} (${animal.age})</div>
+              <div class="info-value">${new Date(animal.dateOfBirth).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} (${animal.age})</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Birth Weight</div>
+              <div class="info-value">${animal.birthWeight ? animal.birthWeight + ' kg' : 'N/A'}</div>
             </div>
             <div class="info-item">
               <div class="info-label">Current Weight</div>
               <div class="info-value">${animal.currentWeight} kg</div>
             </div>
             <div class="info-item">
+              <div class="info-label">Color & Markings</div>
+              <div class="info-value">${animal.colorMarkings || 'N/A'}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Status</div>
+              <div class="info-value">
+                <span class="status-badge badge-active">${animal.status}</span>
+              </div>
+            </div>
+            <div class="info-item">
               <div class="info-label">Health Status</div>
               <div class="info-value">
-                <span class="status-badge status-healthy">${animal.healthStatus}</span>
+                <span class="status-badge badge-healthy">${animal.healthStatus}</span>
               </div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Last Checkup</div>
+              <div class="info-value">${animal.lastCheckup}</div>
             </div>
           </div>
-        </div>
-
-        <div class="section">
-          <div class="section-title">Vaccination History</div>
-          ${animal.vaccinations.map((vacc, i) => `
-            <div class="vaccine-detail">
-              <h3>${i + 1}. ${vacc.name}</h3>
-              <div class="vaccine-info">
-                <div class="vaccine-info-item">
-                  <strong>Date Administered</strong>
-                  ${vacc.date}
-                </div>
-                <div class="vaccine-info-item">
-                  <strong>Next Due Date</strong>
-                  ${vacc.nextDue}
-                </div>
-                <div class="vaccine-info-item">
-                  <strong>Administered By</strong>
-                  ${vacc.administeredBy}
-                </div>
-              </div>
+          ${animal.notes ? `
+            <div style="margin-top: 15px; padding: 12px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px;">
+              <strong style="color: #92400e; font-size: 11px;">NOTES:</strong>
+              <p style="margin: 5px 0 0 0; color: #78350f; font-size: 12px;">${animal.notes}</p>
             </div>
-          `).join('')}
+          ` : ''}
         </div>
 
+        <!-- Parent Information -->
+        ${animal.damId || animal.sireId ? `
+          <div class="section">
+            <div class="section-title">👪 Parent Information</div>
+            <div class="info-grid">
+              ${animal.damId ? `
+                <div class="info-item">
+                  <div class="info-label">Dam (Mother) ID</div>
+                  <div class="info-value">${animal.damId}</div>
+                </div>
+              ` : ''}
+              ${animal.sireId ? `
+                <div class="info-item">
+                  <div class="info-label">Sire (Father) ID</div>
+                  <div class="info-value">${animal.sireId}</div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Weight History -->
+        ${animal.weightHistory && animal.weightHistory.length > 0 ? `
+          <div class="section">
+            <div class="section-title">⚖️ Weight History</div>
+            ${animal.weightHistory.slice(0, 10).map((record, i) => `
+              <div class="weight-history">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <strong style="color: #10b981;">${new Date(record.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</strong>
+                    <span style="margin-left: 15px; font-size: 16px; font-weight: bold; color: #059669;">${record.weight} kg</span>
+                  </div>
+                  ${i < animal.weightHistory.length - 1 ? `
+                    <span style="font-size: 11px; color: ${record.weight > animal.weightHistory[i + 1].weight ? '#10b981' : '#ef4444'};">
+                      ${record.weight > animal.weightHistory[i + 1].weight ? '↑' : '↓'} ${Math.abs(record.weight - animal.weightHistory[i + 1].weight).toFixed(1)} kg
+                    </span>
+                  ` : ''}
+                </div>
+                ${record.notes ? `<div style="margin-top: 5px; font-size: 11px; color: #666;">${record.notes}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        <!-- Vaccination History -->
         <div class="section">
-          <div class="section-title">Medication History</div>
-          <table class="vaccine-table">
+          <div class="section-title">💉 Vaccination History</div>
+          <table class="table">
             <thead>
               <tr>
-                <th>Medication</th>
-                <th>Date</th>
-                <th>Dosage</th>
-                <th>Withdrawal Period</th>
+                <th>Vaccine/Vitamin</th>
+                <th>Date Administered</th>
+                <th>Next Due Date</th>
+                <th>Administered By</th>
               </tr>
             </thead>
             <tbody>
-              ${animal.medications.map(med => `
+              ${animal.vaccinations.map(vacc => `
                 <tr>
-                  <td><strong>${med.name}</strong></td>
-                  <td>${med.date}</td>
-                  <td>${med.dosage}</td>
-                  <td>${med.withdrawalPeriod}</td>
+                  <td><strong>${vacc.name}</strong></td>
+                  <td>${new Date(vacc.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                  <td>${vacc.nextDue ? new Date(vacc.nextDue).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</td>
+                  <td>${vacc.administeredBy}</td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
         </div>
 
-        <div class="section">
-          <div class="section-title">Health & Vaccination Activity Log</div>
-          ${animal.activities
-            .filter(activity => 
-              activity.type === 'Vaccination' || 
-              activity.type === 'Deworming' || 
-              activity.type === 'Health Check' ||
-              activity.type === 'Breeding Check'
-            )
-            .map(activity => `
-              <div class="activity-item">
-                <div class="activity-date">${activity.date}</div>
-                <div class="activity-type">${activity.type}</div>
-                <div class="activity-desc">${activity.description}</div>
-                <div class="activity-by">Performed by: ${activity.by}</div>
+        <!-- Medication History -->
+        ${animal.medications && animal.medications.length > 0 ? `
+          <div class="section">
+            <div class="section-title">💊 Medication History</div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Medication</th>
+                  <th>Date</th>
+                  <th>Dosage</th>
+                  <th>Withdrawal Period</th>
+                  <th>Administered By</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${animal.medications.map(med => `
+                  <tr>
+                    <td><strong>${med.name}</strong></td>
+                    <td>${new Date(med.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                    <td>${med.dosage}</td>
+                    <td>${med.withdrawalPeriod}</td>
+                    <td>${med.administeredBy}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        ` : ''}
+
+        <!-- Breeding Status -->
+        ${animal.breedingStatus ? `
+          <div class="section">
+            <div class="section-title">💕 Breeding Information</div>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">Breeding Status</div>
+                <div class="info-value">${animal.breedingStatus}</div>
+              </div>
+              ${animal.lastBreedingCheck ? `
+                <div class="info-item">
+                  <div class="info-label">Last Breeding Check</div>
+                  <div class="info-value">${new Date(animal.lastBreedingCheck).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                </div>
+              ` : ''}
+              ${animal.pregnancyEligibility ? `
+                <div class="info-item">
+                  <div class="info-label">Pregnancy Eligibility</div>
+                  <div class="info-value">${animal.pregnancyEligibility}</div>
+                </div>
+              ` : ''}
+            </div>
+            <p style="font-size: 11px; color: #666; margin-top: 10px;">
+              * For detailed breeding history, please export the Breeding History report separately.
+            </p>
+          </div>
+        ` : ''}
+
+        <!-- Recent Activities -->
+        ${animal.activities && animal.activities.length > 0 ? `
+          <div class="section">
+            <div class="section-title">📝 Recent Activity Log (Last 10)</div>
+            ${animal.activities.slice(0, 10).map(activity => `
+              <div class="record-card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                  <div>
+                    <strong style="color: #059669; font-size: 13px;">${activity.type}</strong>
+                    <div style="font-size: 11px; color: #666; margin-top: 3px;">${new Date(activity.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>
+                  </div>
+                </div>
+                <div style="font-size: 12px; color: #555; margin-bottom: 5px;">${activity.description}</div>
+                <div style="font-size: 11px; color: #666; font-style: italic;">Performed by: ${activity.by}</div>
               </div>
             `).join('')}
-        </div>
+          </div>
+        ` : ''}
 
         <div class="footer">
           <p><strong>DigiFarm Livestock Management System</strong></p>
-          <p>This is an official livestock health and vaccination record</p>
+          <p>This is an official livestock profile and health record</p>
+          <p>Report generated on ${new Date().toLocaleString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}</p>
         </div>
       </body>
       </html>
@@ -1421,6 +1775,85 @@ export default function LivestockProfile() {
               </div>
             </div>
           </div>
+
+          {/* Offspring Card */}
+          {(() => {
+            const offspring = livestock.filter(child => 
+              child.damId === animal.livestockId || child.sireId === animal.livestockId
+            );
+            
+            if (offspring.length === 0) return null;
+            
+            return (
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-slate-900 flex items-center space-x-2">
+                    <Baby size={20} className="text-purple-600" />
+                    <span>Offspring</span>
+                    <span className="px-2.5 py-0.5 bg-purple-200 text-purple-900 text-xs font-bold rounded-full">
+                      {offspring.length}
+                    </span>
+                  </h2>
+                </div>
+                <div className="space-y-3">
+                  {offspring.map((child) => {
+                    const relationText = child.damId === animal.livestockId && child.sireId === animal.livestockId 
+                      ? 'Both Parents' 
+                      : child.damId === animal.livestockId 
+                        ? animal.sex === 'Female' ? 'Mother' : 'Dam'
+                        : animal.sex === 'Male' ? 'Father' : 'Sire';
+                    
+                    return (
+                      <Link
+                        key={child.id}
+                        to={`/livestock/${child.livestockId}`}
+                        className="block p-4 bg-white hover:bg-purple-50 rounded-lg border border-purple-200 hover:border-purple-300 transition-all group"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                              <span className="text-lg">
+                                {child.species === 'Cattle' ? '🐄' : child.species === 'Goat' ? '🐐' : '🐑'}
+                              </span>
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <p className="text-sm font-bold text-slate-900">{child.livestockId}</p>
+                                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-semibold rounded">
+                                  {relationText}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-600 mb-1">
+                                {child.breed} • {child.category} • {child.sex}
+                              </p>
+                              <div className="flex items-center space-x-3 text-xs text-slate-500">
+                                <span className="flex items-center space-x-1">
+                                  <Calendar size={12} />
+                                  <span>Born: {new Date(child.dateOfBirth).toLocaleDateString()}</span>
+                                </span>
+                                <span className="flex items-center space-x-1">
+                                  <Weight size={12} />
+                                  <span>{child.currentWeight} kg</span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
+                            child.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                            child.status === 'Sold' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                            child.status === 'Deceased' ? 'bg-slate-100 text-slate-700 border-slate-300' :
+                            'bg-amber-50 text-amber-700 border-amber-200'
+                          }`}>
+                            {child.status}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -1635,21 +2068,6 @@ export default function LivestockProfile() {
                       <option value="Twin">Twin</option>
                       <option value="Triplet">Triplet</option>
                     </select>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Current Weight (kg) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      name="currentWeight"
-                      value={editFormData.currentWeight}
-                      onChange={handleInputChange}
-                      step="0.1"
-                      required
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
                   </div>
 
                   <div className="md:col-span-2">
@@ -2147,14 +2565,23 @@ export default function LivestockProfile() {
                   {animal.breedingHistory.length} Records
                 </span>
               </div>
-              <button
-                onClick={() => setIsBreedingHistoryModalOpen(false)}
-                className="text-purple-400 hover:text-purple-600 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleExportBreedingHistory}
+                  className="flex items-center space-x-1.5 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium"
+                >
+                  <Download size={16} />
+                  <span>Export</span>
+                </button>
+                <button
+                  onClick={() => setIsBreedingHistoryModalOpen(false)}
+                  className="text-purple-400 hover:text-purple-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <div className="p-6 overflow-y-auto flex-1">

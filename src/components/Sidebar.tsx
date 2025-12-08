@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -12,6 +12,7 @@ import {
   type LucideIcon
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { useSidebarContext } from '../App';
 
 interface NavItem {
   name: string;
@@ -49,7 +50,7 @@ export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { clearUser, userRole } = useStore();
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, setCollapsed } = useSidebarContext();
 
   const isActive = (path: string) => location.pathname === path;
   

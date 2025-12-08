@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Search, Plus, Beef, Filter, AlertCircle, CheckCircle, AlertTriangle, X, Eye } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
@@ -41,6 +41,7 @@ const mockLivestock: LivestockItem[] = [
 
 export default function Livestock() {
   const { userRole } = useStore();
+  const location = useLocation();
   const isViewer = userRole === 'viewer';
   
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -49,6 +50,15 @@ export default function Livestock() {
   const [sexFilter, setSexFilter] = React.useState<string>('all');
   const [categoryFilter, setCategoryFilter] = React.useState<string>('all');
   const [showFilters, setShowFilters] = React.useState(false);
+
+  // Set search query from navigation state
+  React.useEffect(() => {
+    if (location.state?.searchQuery) {
+      setSearchQuery(location.state.searchQuery);
+      // Clear the state after using it
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const filteredLivestock = mockLivestock.filter(animal => {
     const matchesSearch = animal.tag.toLowerCase().includes(searchQuery.toLowerCase()) ||

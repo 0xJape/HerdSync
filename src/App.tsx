@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route, useLocation, Link } from 'react-router-dom';
+import React, { useState, useRef, useEffect, createContext, useContext } from 'react';
+import { Routes, Route, useLocation, Link, useNavigate } from 'react-router-dom';
 import { Search, Bell, AlertCircle, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -16,6 +16,11 @@ import ManageUsers from './pages/ManageUsers';
 import Pregnancy from './pages/Pregnancy';
 import PregnancyDetail from './pages/PregnancyDetail';
 import Sidebar from './components/Sidebar';
+import { useStore } from './store/useStore';
+
+// Create sidebar collapse context
+const SidebarContext = createContext({ collapsed: false, setCollapsed: (_: boolean) => {} });
+export const useSidebarContext = () => useContext(SidebarContext);
 
 // Mock alerts data
 const mockAlerts = [
@@ -63,16 +68,38 @@ const mockAlerts = [
 
 export default function App() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isHomePage = location.pathname === '/';
   const isAuthPage = location.pathname === '/login';
-  const [showNotifications, setShowNotifications] = React.useState(false);
-  const notificationRef = React.useRef<HTMLDivElement>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+  
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const { livestock } = useStore();
+
+  // Filter livestock based on search query
+  const searchResults = searchQuery.trim() 
+    ? livestock.filter(animal => 
+        animal.livestockId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        animal.breed.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        animal.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        animal.species.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        animal.colorMarkings?.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 8) // Limit to 8 results
+    : [];
 
   // Close notifications when clicking outside
-  React.useEffect(() => {
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
         setShowNotifications(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
       }
     }
 
@@ -106,11 +133,12 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {!isHomePage && !isAuthPage && <Sidebar />}
-      
-      <main className={`${!isHomePage && !isAuthPage ? 'ml-64' : ''} transition-all duration-300`}>
-        {!isHomePage && !isAuthPage && (
+    <SidebarContext.Provider value={{ collapsed: sidebarCollapsed, setCollapsed: setSidebarCollapsed }}>
+      <div className="min-h-screen bg-slate-50">
+        {!isHomePage && !isAuthPage && <Sidebar />}
+        
+        <main className={`${!isHomePage && !isAuthPage ? (sidebarCollapsed ? 'ml-16' : 'ml-64') : ''} transition-all duration-300`}>
+          {!isHomePage && !isAuthPage && (
           <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
             <div className="px-8 py-4 flex items-center justify-between">
               <div>
@@ -121,13 +149,71 @@ export default function App() {
               
               <div className="flex items-center space-x-3">
                 {/* Search */}
-                <div className="relative">
+                <div className="relative" ref={searchRef}>
                   <input
                     type="search"
-                    placeholder="Search"
-                    className="w-64 pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-slate-300 focus:bg-white transition-all"
+                    placeholder="Search livestock..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowSearchResults(true);
+                    }}
+                    onFocus={() => setShowSearchResults(true)}
+                    className="w-64 pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:bg-white transition-all"
                   />
                   <Search size={16} className="absolute left-3 top-2.5 text-slate-400" />
+                  
+                  {/* Search Results Dropdown */}
+                  {showSearchResults && searchQuery.trim() && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-slate-200 z-50 max-h-96 overflow-hidden">
+                      {searchResults.length > 0 ? (
+                        <div className="py-2">
+                          <div className="px-3 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                            Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+                          </div>
+                          <div className="max-h-80 overflow-y-auto">
+                            {searchResults.map((animal) => (
+                              <Link
+                                key={animal.id}
+                                to="/livestock"
+                                state={{ searchQuery: animal.livestockId }}
+                                onClick={() => {
+                                  setSearchQuery('');
+                                  setShowSearchResults(false);
+                                }}
+                                className="w-full flex items-center space-x-3 px-3 py-2.5 hover:bg-slate-50 transition-colors"
+                              >
+                                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-primary-100 to-primary-200 rounded-lg flex items-center justify-center">
+                                  <span className="text-sm font-bold text-primary-700">
+                                    {animal.species === 'Cattle' ? '🐄' : animal.species === 'Goat' ? '🐐' : '🐑'}
+                                  </span>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center space-x-2">
+                                    <p className="text-sm font-semibold text-slate-900">{animal.livestockId}</p>
+                                    <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-medium rounded">
+                                      {animal.species}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-slate-500 truncate">
+                                    {animal.breed} • {animal.category} • {animal.sex}
+                                  </p>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="px-4 py-8 text-center">
+                          <Search size={32} className="mx-auto text-slate-300 mb-2" />
+                          <p className="text-sm font-medium text-slate-900">No results found</p>
+                          <p className="text-xs text-slate-500 mt-1">
+                            Try searching by ID, breed, or category
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Notifications */}
@@ -242,7 +328,8 @@ export default function App() {
           </Routes>
         </div>
       </main>
-    </div>
+      </div>
+    </SidebarContext.Provider>
   );
 }
 

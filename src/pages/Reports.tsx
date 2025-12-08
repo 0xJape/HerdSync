@@ -208,13 +208,41 @@ export default function Reports() {
 
         {/* Population Trend Graph - No Print */}
         <div className="bg-white rounded-lg border border-slate-200 p-6 no-print">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Livestock Population Trend</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-2">Livestock Population Trend</h2>
           <p className="text-sm text-slate-600 mb-6">Monthly changes in livestock count by species</p>
           
-          {/* Line Graph */}
-          <div className="relative h-80">
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-medium text-blue-900">Cattle</span>
+                <span className="text-xl">🐄</span>
+              </div>
+              <p className="text-2xl font-bold text-blue-600">{cattleTotal}</p>
+              <p className="text-xs text-blue-600 mt-1">+2 this month</p>
+            </div>
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-medium text-purple-900">Goats</span>
+                <span className="text-xl">🐐</span>
+              </div>
+              <p className="text-2xl font-bold text-purple-600">{goatTotal}</p>
+              <p className="text-xs text-purple-600 mt-1">+4 this month</p>
+            </div>
+            <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg p-4 border border-pink-200">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-medium text-pink-900">Sheep</span>
+                <span className="text-xl">🐑</span>
+              </div>
+              <p className="text-2xl font-bold text-pink-600">{sheepTotal}</p>
+              <p className="text-xs text-pink-600 mt-1">+1 this month</p>
+            </div>
+          </div>
+          
+          {/* Enhanced Line Graph */}
+          <div className="relative h-80 bg-gradient-to-br from-slate-50 to-white rounded-lg p-4 border border-slate-200">
             {/* Y-axis labels */}
-            <div className="absolute left-0 top-0 bottom-12 w-12 flex flex-col justify-between text-xs text-slate-600">
+            <div className="absolute left-2 top-4 bottom-16 w-10 flex flex-col justify-between text-xs text-slate-600 font-medium">
               <span>80</span>
               <span>60</span>
               <span>40</span>
@@ -224,62 +252,101 @@ export default function Reports() {
 
             {/* Graph area */}
             <div className="ml-12 mr-4 h-full">
-              {/* Grid lines */}
-              <div className="relative h-full border-l-2 border-b-2 border-slate-300">
-                {/* Horizontal grid lines */}
-                <div className="absolute inset-0">
+              <div className="relative h-full">
+                {/* Grid lines */}
+                <div className="absolute inset-0 flex flex-col justify-between pb-12">
                   {[0, 1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="absolute w-full border-t border-slate-200"
-                      style={{ bottom: `${i * 25}%` }}
-                    />
+                    <div key={i} className="w-full border-t border-slate-200" />
                   ))}
                 </div>
 
-                {/* SVG for lines */}
-                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 600 300" preserveAspectRatio="none">
-                  {/* Cattle line - Blue */}
-                  <polyline
-                    points="0,195 100,180 200,165 300,150 400,120 500,90 600,97"
+                {/* SVG for lines with gradients */}
+                <svg className="absolute inset-0 w-full h-full pb-12" viewBox="0 0 700 300" preserveAspectRatio="none">
+                  <defs>
+                    {/* Gradient for Cattle */}
+                    <linearGradient id="cattleGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.05" />
+                    </linearGradient>
+                    {/* Gradient for Goats */}
+                    <linearGradient id="goatGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#a855f7" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#a855f7" stopOpacity="0.05" />
+                    </linearGradient>
+                    {/* Gradient for Sheep */}
+                    <linearGradient id="sheepGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#ec4899" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#ec4899" stopOpacity="0.05" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Cattle area and line */}
+                  <path
+                    d="M0,195 L100,180 L200,165 L300,150 L400,120 L500,90 L600,97 L600,300 L0,300 Z"
+                    fill="url(#cattleGradient)"
+                  />
+                  <path
+                    d="M0,195 L100,180 L200,165 L300,150 L400,120 L500,90 L600,97"
                     fill="none"
                     stroke="#3b82f6"
                     strokeWidth="3"
-                    vectorEffect="non-scaling-stroke"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
-                  {/* Goats line - Purple */}
-                  <polyline
-                    points="0,225 100,210 200,195 300,180 400,165 500,150 600,143"
+
+                  {/* Goats area and line */}
+                  <path
+                    d="M0,225 L100,210 L200,195 L300,180 L400,165 L500,150 L600,143 L600,300 L0,300 Z"
+                    fill="url(#goatGradient)"
+                  />
+                  <path
+                    d="M0,225 L100,210 L200,195 L300,180 L400,165 L500,150 L600,143"
                     fill="none"
                     stroke="#a855f7"
                     strokeWidth="3"
-                    vectorEffect="non-scaling-stroke"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
-                  {/* Sheep line - Pink */}
-                  <polyline
-                    points="0,240 100,237 200,234 300,225 400,220 500,210 600,207"
+
+                  {/* Sheep area and line */}
+                  <path
+                    d="M0,240 L100,237 L200,234 L300,225 L400,220 L500,210 L600,207 L600,300 L0,300 Z"
+                    fill="url(#sheepGradient)"
+                  />
+                  <path
+                    d="M0,240 L100,237 L200,234 L300,225 L400,220 L500,210 L600,207"
                     fill="none"
                     stroke="#ec4899"
                     strokeWidth="3"
-                    vectorEffect="non-scaling-stroke"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
 
                   {/* Data points - Cattle */}
-                  {[{x:0,y:195},{x:100,y:180},{x:200,y:165},{x:300,y:150},{x:400,y:120},{x:500,y:90},{x:600,y:97}].map((point, i) => (
-                    <circle key={`cattle-${i}`} cx={point.x} cy={point.y} r="4" fill="#3b82f6" />
+                  {[{x:0,y:195,val:20},{x:100,y:180,val:22},{x:200,y:165,val:24},{x:300,y:150,val:26},{x:400,y:120,val:30},{x:500,y:90,val:34},{x:600,y:97,val:26}].map((point, i) => (
+                    <g key={`cattle-${i}`}>
+                      <circle cx={point.x} cy={point.y} r="5" fill="white" stroke="#3b82f6" strokeWidth="2" />
+                      <circle cx={point.x} cy={point.y} r="3" fill="#3b82f6" />
+                    </g>
                   ))}
                   {/* Data points - Goats */}
-                  {[{x:0,y:225},{x:100,y:210},{x:200,y:195},{x:300,y:180},{x:400,y:165},{x:500,y:150},{x:600,y:143}].map((point, i) => (
-                    <circle key={`goat-${i}`} cx={point.x} cy={point.y} r="4" fill="#a855f7" />
+                  {[{x:0,y:225,val:18},{x:100,y:210,val:20},{x:200,y:195,val:22},{x:300,y:180,val:24},{x:400,y:165,val:26},{x:500,y:150,val:28},{x:600,y:143,val:28}].map((point, i) => (
+                    <g key={`goat-${i}`}>
+                      <circle cx={point.x} cy={point.y} r="5" fill="white" stroke="#a855f7" strokeWidth="2" />
+                      <circle cx={point.x} cy={point.y} r="3" fill="#a855f7" />
+                    </g>
                   ))}
                   {/* Data points - Sheep */}
-                  {[{x:0,y:240},{x:100,y:237},{x:200,y:234},{x:300,y:225},{x:400,y:220},{x:500,y:210},{x:600,y:207}].map((point, i) => (
-                    <circle key={`sheep-${i}`} cx={point.x} cy={point.y} r="4" fill="#ec4899" />
+                  {[{x:0,y:240,val:15},{x:100,y:237,val:15},{x:200,y:234,val:16},{x:300,y:225,val:17},{x:400,y:220,val:17},{x:500,y:210,val:18},{x:600,y:207,val:17}].map((point, i) => (
+                    <g key={`sheep-${i}`}>
+                      <circle cx={point.x} cy={point.y} r="5" fill="white" stroke="#ec4899" strokeWidth="2" />
+                      <circle cx={point.x} cy={point.y} r="3" fill="#ec4899" />
+                    </g>
                   ))}
                 </svg>
 
                 {/* X-axis labels */}
-                <div className="absolute -bottom-8 left-0 right-0 flex justify-between text-xs text-slate-600">
+                <div className="absolute -bottom-1 left-0 right-0 flex justify-between text-xs text-slate-600 font-medium">
                   <span>Jun</span>
                   <span>Jul</span>
                   <span>Aug</span>
@@ -293,18 +360,18 @@ export default function Reports() {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center justify-center space-x-6 mt-8">
+          <div className="flex items-center justify-center space-x-8 mt-6">
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-slate-700">Cattle (26)</span>
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <span className="text-sm font-medium text-slate-700">Cattle</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
-              <span className="text-sm text-slate-700">Goats (28)</span>
+              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+              <span className="text-sm font-medium text-slate-700">Goats</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-pink-500 rounded-full"></div>
-              <span className="text-sm text-slate-700">Sheep (17)</span>
+              <div className="w-3 h-3 bg-pink-500 rounded-full"></div>
+              <span className="text-sm font-medium text-slate-700">Sheep</span>
             </div>
           </div>
         </div>

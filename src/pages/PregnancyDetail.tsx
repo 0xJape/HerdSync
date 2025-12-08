@@ -339,8 +339,8 @@ export default function PregnancyDetail() {
           </button>
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">Pregnancy Monitoring</h1>
-            <p className="text-sm text-slate-600 mt-1">
-              Dam: <Link to={`/livestock/${pregnancy.damId}`} className="text-primary-600 hover:text-primary-700 font-medium">{pregnancy.damId}</Link> - {pregnancy.damName}
+            <p className="text-base text-slate-600 mt-1">
+              Dam: <Link to={`/livestock/${pregnancy.damId}`} className="text-primary-600 hover:text-primary-700 font-semibold">{pregnancy.damId}</Link> - <span className="font-medium">{pregnancy.damName}</span>
             </p>
           </div>
         </div>
@@ -450,13 +450,13 @@ export default function PregnancyDetail() {
             <div className="space-y-3">
               <div>
                 <p className="text-xs text-slate-500">Livestock ID</p>
-                <Link to={`/livestock/${pregnancy.damId}`} className="text-sm font-bold text-primary-600 hover:text-primary-700">
+                <Link to={`/livestock/${pregnancy.damId}`} className="text-base font-bold text-primary-600 hover:text-primary-700">
                   {pregnancy.damId}
                 </Link>
               </div>
               <div>
                 <p className="text-xs text-slate-500">Name</p>
-                <p className="text-sm font-medium text-slate-900">{pregnancy.damName}</p>
+                <p className="text-base font-medium text-slate-900">{pregnancy.damName}</p>
               </div>
               <div>
                 <p className="text-xs text-slate-500">Species</p>
