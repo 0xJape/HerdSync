@@ -157,7 +157,7 @@ export default function AuditLog() {
   const handleExport = () => {
     // Export audit logs to CSV
     const csvContent = [
-      ['Timestamp', 'User', 'Role', 'Action', 'Entity', 'Entity ID', 'Details', 'IP Address', 'Status'],
+      ['Timestamp', 'User', 'Role', 'Action', 'Entity', 'Entity ID', 'Details', 'Status'],
       ...filteredLogs.map(log => [
         log.timestamp,
         log.user,
@@ -166,7 +166,6 @@ export default function AuditLog() {
         log.entity,
         log.entityId,
         log.details,
-        log.ipAddress,
         log.status
       ])
     ].map(row => row.join(',')).join('\n');
@@ -321,9 +320,6 @@ export default function AuditLog() {
                   Details
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
-                  IP Address
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
                   Status
                 </th>
               </tr>
@@ -361,9 +357,6 @@ export default function AuditLog() {
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-700 max-w-xs truncate">
                     {log.details}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-slate-600 font-mono">
-                    {log.ipAddress}
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(log.status)}`}>

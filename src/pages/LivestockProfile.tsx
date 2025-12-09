@@ -1114,6 +1114,7 @@ export default function LivestockProfile() {
       case 'Sick': return 'bg-red-50 text-red-700 border-red-200';
       case 'Active': return 'bg-primary-50 text-primary-700 border-primary-200';
       case 'Sold': return 'bg-slate-50 text-slate-700 border-slate-200';
+      case 'Culled': return 'bg-orange-50 text-orange-700 border-orange-200';
       case 'Deceased': return 'bg-red-100 text-red-900 border-red-500 border-2 font-bold';
       default: return 'bg-slate-50 text-slate-700 border-slate-200';
     }
@@ -2053,24 +2054,6 @@ export default function LivestockProfile() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Birth Type <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="birthType"
-                      value={editFormData.birthType}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    >
-                      <option value="">Select birth type</option>
-                      <option value="Single">Single</option>
-                      <option value="Twin">Twin</option>
-                      <option value="Triplet">Triplet</option>
-                    </select>
-                  </div>
-
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       Color & Markings
@@ -2925,6 +2908,12 @@ export default function LivestockProfile() {
               } else if (selectedStatus === 'Sold') {
                 setIsStatusModalOpen(false);
                 setIsSoldModalOpen(true);
+              } else if (selectedStatus === 'Culled') {
+                setShowSuccessModal(true);
+                setIsStatusModalOpen(false);
+                setTimeout(() => {
+                  setShowSuccessModal(false);
+                }, 3000);
               } else {
                 setShowSuccessModal(true);
                 setIsStatusModalOpen(false);
@@ -2946,7 +2935,7 @@ export default function LivestockProfile() {
                   New Status <span className="text-red-500">*</span>
                 </label>
                 <div className="space-y-2">
-                  {['Active', 'Sold', 'Deceased'].map((status) => (
+                  {['Active', 'Sold', 'Culled', 'Deceased'].map((status) => (
                     <label key={status} className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
                       selectedStatus === status 
                         ? 'border-primary-500 bg-primary-50' 
@@ -2971,6 +2960,9 @@ export default function LivestockProfile() {
                       {status === 'Sold' && (
                         <span className="ml-auto text-xs text-blue-600 font-medium">Requires Details</span>
                       )}
+                      {status === 'Culled' && (
+                        <span className="ml-auto text-xs text-orange-600 font-medium">Requires Details</span>
+                      )}
                     </label>
                   ))}
                 </div>
@@ -2988,6 +2980,14 @@ export default function LivestockProfile() {
                 <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-xs text-blue-900">
                     💰 Selecting "Sold" will open a form to record buyer and selling details.
+                  </p>
+                </div>
+              )}
+
+              {selectedStatus === 'Culled' && (
+                <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <p className="text-xs text-orange-900">
+                    🔪 Selecting "Culled" will mark this animal as removed from the breeding stock.
                   </p>
                 </div>
               )}

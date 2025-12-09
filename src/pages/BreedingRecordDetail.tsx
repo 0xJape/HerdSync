@@ -299,13 +299,22 @@ export default function BreedingRecordDetail() {
               </p>
             </div>
 
-            <button 
-              onClick={() => setShowConfirmModal(true)}
-              className="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
-            >
-              <CheckCircle size={18} className="mr-2" />
-              Confirm Pregnancy Status
-            </button>
+            <div className="grid grid-cols-2 gap-3">
+              <button 
+                onClick={() => handleConfirmPregnancy('pregnant')}
+                className="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
+              >
+                <CheckCircle size={18} className="mr-2" />
+                Confirmed Pregnant
+              </button>
+              <button 
+                onClick={() => handleConfirmPregnancy('open')}
+                className="px-4 py-3 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
+              >
+                <AlertCircle size={18} className="mr-2" />
+                Not Pregnant
+              </button>
+            </div>
           </div>
 
           {/* Breeding Details */}
@@ -417,25 +426,6 @@ export default function BreedingRecordDetail() {
                 <p className="text-slate-500">Breeding Method</p>
                 <p className="font-medium text-slate-900">{breeding.method}</p>
               </div>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white rounded-lg border border-slate-200 p-5">
-            <h3 className="font-semibold text-slate-900 mb-3">Quick Actions</h3>
-            <div className="space-y-2">
-              <Link
-                to={`/livestock/${breeding.damId}`}
-                className="block w-full px-4 py-2 bg-pink-50 hover:bg-pink-100 text-pink-700 text-sm font-medium rounded-lg transition-colors text-center"
-              >
-                View Dam Profile
-              </Link>
-              <Link
-                to={`/livestock/${breeding.sireId}`}
-                className="block w-full px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-medium rounded-lg transition-colors text-center"
-              >
-                View Sire Profile
-              </Link>
             </div>
           </div>
         </div>

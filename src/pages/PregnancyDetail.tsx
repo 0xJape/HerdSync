@@ -742,7 +742,7 @@ export default function PregnancyDetail() {
                 {pregnancy.offspring.map((off, index) => (
                   <div key={index} className="bg-white rounded-lg p-4 border border-emerald-200">
                     <p className="text-xs font-semibold text-slate-700 mb-3">Offspring #{index + 1}</p>
-                    <div className="grid grid-cols-3 gap-3 mb-3">
+                    <div className="grid grid-cols-2 gap-3 mb-3">
                       <div>
                         <p className="text-xs text-slate-500">Sex</p>
                         <p className="text-sm font-bold text-slate-900">{off.sex}</p>
@@ -750,6 +750,16 @@ export default function PregnancyDetail() {
                       <div>
                         <p className="text-xs text-slate-500">Birth Weight</p>
                         <p className="text-sm font-bold text-slate-900">{off.weight} kg</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500">Calf Vigor</p>
+                        <p className={`text-sm font-bold ${
+                          off.calfVigor === 'Strong' ? 'text-emerald-700' : 
+                          off.calfVigor === 'Moderate' ? 'text-blue-700' :
+                          'text-amber-700'
+                        }`}>
+                          {off.calfVigor}
+                        </p>
                       </div>
                       <div>
                         <p className="text-xs text-slate-500">Condition</p>
