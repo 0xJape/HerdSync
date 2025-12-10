@@ -69,6 +69,12 @@ const viewerSections: NavSection[] = [
 
 const adminSections: NavSection[] = [
   {
+    title: '',
+    items: [
+      { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['admin'] },
+    ],
+  },
+  {
     title: 'ADMINISTRATION',
     items: [
       { name: 'Manage Users', path: '/manage-users', icon: Users, adminOnly: true },

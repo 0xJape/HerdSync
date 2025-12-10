@@ -57,7 +57,7 @@ export default function Home() {
             </Link>
           </div>
           <p className="text-sm text-slate-500 mt-4">
-            Access restricted to authorized faculty, staff, and students. Contact your administrator for credentials.
+            Access restricted to authorized faculty and staff. Contact your administrator for credentials.
           </p>
         </div>
 
