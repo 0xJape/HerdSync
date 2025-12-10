@@ -17,10 +17,10 @@ export default function Home() {
             <div className="border-l border-slate-300 h-10 mx-2"></div>
             <img 
               src="/images/main_logo.png" 
-              alt="DigiFarm Logo" 
+              alt="HerdSync Logo" 
               className="h-10 object-contain"
             />
-            <span className="text-base font-semibold text-slate-900">DigiFarm</span>
+            <span className="text-base font-semibold text-slate-900">HerdSync</span>
           </div>
           <Link
             to="/login"
@@ -36,17 +36,17 @@ export default function Home() {
         <div className="max-w-5xl mx-auto text-center">
           <div className="mb-6">
             <span className="inline-flex items-center px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-medium">
-              Mindanao State University - General Santos City
+              Mindanao State University - General Santos
             </span>
           </div>
           <h1 className="text-4xl md:text-5xl font-semibold text-slate-900 mb-4 leading-tight">
-            Web-Based Livestock Information<br />Management System
+              Livestock Management<br /> Information System
           </h1>
           <p className="text-base text-slate-600 max-w-3xl mx-auto mb-3">
             College of Agriculture Animal Science Farm
           </p>
           <p className="text-sm text-slate-500 max-w-3xl mx-auto mb-10">
-            A comprehensive digital platform for recording, monitoring, and organizing livestock health, breeding, and farm management data for cattle, goats, and sheep at MSU-GenSan.
+            A digital platform for recording, monitoring, and organizing livestock health, breeding, and farm management data for cattle, goats, and sheep at MSU-GenSan.
           </p>
           <div className="flex items-center justify-center">
             <Link
@@ -135,13 +135,13 @@ export default function Home() {
       <footer className="border-t border-slate-200 py-8 mt-16">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <p className="text-slate-600 text-sm font-medium mb-2">
-            DigiFarm: Development of a Web-Based Livestock Information Management System
+            HerdSync: Development of a Web-Based Livestock Information Management System
           </p>
           <p className="text-slate-500 text-xs">
             College of Agriculture Animal Science Farm • Mindanao State University – General Santos City
           </p>
           <p className="text-slate-400 text-xs mt-3">
-            © 2025 DigiFarm. All rights reserved.
+            © 2025 HerdSync. All rights reserved.
           </p>
         </div>
       </footer>

@@ -69,12 +69,6 @@ const viewerSections: NavSection[] = [
 
 const adminSections: NavSection[] = [
   {
-    title: '',
-    items: [
-      { name: 'Livestock', path: '/livestock', icon: Beef, badge: 71, roles: ['admin'] },
-    ],
-  },
-  {
     title: 'ADMINISTRATION',
     items: [
       { name: 'Manage Users', path: '/manage-users', icon: Users, adminOnly: true },
@@ -112,11 +106,11 @@ export default function Sidebar() {
           <Link to="/" className="flex items-center space-x-2 group">
             <img 
               src="/images/main_logo.png" 
-              alt="DigiFarm Logo" 
+              alt="HerdSync Logo" 
               className="w-10 h-10 object-contain"
             />
             <span className="text-base font-semibold text-slate-900">
-              DigiFarm
+              HerdSync
             </span>
           </Link>
         )}
@@ -127,7 +121,7 @@ export default function Sidebar() {
           >
             <img 
               src="/images/main_logo.png" 
-              alt="DigiFarm Logo" 
+              alt="HerdSync Logo" 
               className="w-10 h-10 object-contain"
             />
           </button>

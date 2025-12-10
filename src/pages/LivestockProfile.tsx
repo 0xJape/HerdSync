@@ -603,7 +603,7 @@ export default function LivestockProfile() {
         `).join('')}
 
         <div class="footer">
-          <p><strong>DigiFarm Livestock Management System</strong></p>
+          <p><strong>HerdSync Livestock Management System</strong></p>
           <p>This report was automatically generated on ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
         </div>
       </body>
@@ -983,7 +983,7 @@ export default function LivestockProfile() {
         ` : ''}
 
         <div class="footer">
-          <p><strong>DigiFarm Livestock Management System</strong></p>
+          <p><strong>HerdSync Livestock Management System</strong></p>
           <p>This is an official livestock profile and health record</p>
           <p>Report generated on ${new Date().toLocaleString('en-US', { 
             year: 'numeric', 

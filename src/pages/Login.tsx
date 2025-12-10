@@ -20,7 +20,7 @@ export default function Login() {
     // Detect user role based on email
     const email = formData.email.toLowerCase();
     
-    if (email === 'viewer@digifarm.com') {
+    if (email === 'viewer@herdsync.com') {
       setUserRole('viewer', email);
     } else if (email.includes('veterinarian') || email.includes('vet')) {
       setUserRole('veterinarian', email);
@@ -186,7 +186,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => {
-                setFormData({ ...formData, email: 'admin@digifarm.com', password: 'admin123' });
+                setFormData({ ...formData, email: 'admin@herdsync.com', password: 'admin123' });
               }}
               className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 transition-colors"
             >
@@ -195,7 +195,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => {
-                setFormData({ ...formData, email: 'veterinarian@digifarm.com', password: 'vet123' });
+                setFormData({ ...formData, email: 'veterinarian@herdsync.com', password: 'vet123' });
               }}
               className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 transition-colors"
             >
@@ -204,7 +204,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => {
-                setFormData({ ...formData, email: 'manager@digifarm.com', password: 'manager123' });
+                setFormData({ ...formData, email: 'manager@herdsync.com', password: 'manager123' });
               }}
               className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 transition-colors"
             >
@@ -213,7 +213,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => {
-                setFormData({ ...formData, email: 'viewer@digifarm.com', password: 'viewer123' });
+                setFormData({ ...formData, email: 'viewer@herdsync.com', password: 'viewer123' });
               }}
               className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-xs font-medium text-slate-700 transition-colors"
             >

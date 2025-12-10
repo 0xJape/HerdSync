@@ -25,7 +25,7 @@ export default function ManageUsers() {
     {
       id: 'U-001',
       name: 'Doc Alexis',
-      email: 'alexis.vet@digifarm.com',
+      email: 'alexis.vet@herdsync.com',
       role: 'Admin',
       status: 'Active',
       dateAdded: '2024-01-15',
@@ -34,7 +34,7 @@ export default function ManageUsers() {
     {
       id: 'U-002',
       name: 'Maria Santos',
-      email: 'maria.santos@digifarm.com',
+      email: 'maria.santos@herdsync.com',
       role: 'Veterinarian',
       status: 'Active',
       dateAdded: '2024-02-20',
@@ -43,7 +43,7 @@ export default function ManageUsers() {
     {
       id: 'U-003',
       name: 'Juan Dela Cruz',
-      email: 'juan.delacruz@digifarm.com',
+      email: 'juan.delacruz@herdsync.com',
       role: 'Farm Manager',
       status: 'Active',
       dateAdded: '2024-03-10',
@@ -52,7 +52,7 @@ export default function ManageUsers() {
     {
       id: 'U-004',
       name: 'Pedro Reyes',
-      email: 'pedro.reyes@digifarm.com',
+      email: 'pedro.reyes@herdsync.com',
       role: 'Viewer',
       status: 'Inactive',
       dateAdded: '2024-01-25',
@@ -356,7 +356,7 @@ export default function ManageUsers() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="jalelprincegayo@digifarm.com"
+                  placeholder="jalelprincegayo@herdsync.com"
                   required
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
