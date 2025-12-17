@@ -150,7 +150,7 @@ export default function Breeding() {
       </div>
 
       {/* Breeding Status Card */}
-      <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-lg border border-pink-200 p-6">
+      <div className="bg-gradient-to-br from-pink-50 to-cyan-50 rounded-lg border border-pink-200 p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold text-slate-900 mb-1">Current Breeding Status</h2>
@@ -174,7 +174,7 @@ export default function Breeding() {
         <div className="mb-4">
           <div className="h-3 bg-slate-200 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-pink-500 to-purple-500 rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-pink-500 to-teal-500 rounded-full transition-all duration-500"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -437,12 +437,12 @@ export default function Breeding() {
             <p className="text-2xl font-bold text-blue-600">280 days</p>
           </div>
           
-          <div className="bg-purple-50 rounded-lg p-4">
+          <div className="bg-teal-50 rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-2">
-              <Heart size={16} className="text-purple-600" />
-              <p className="text-xs font-medium text-purple-900">Birth Success</p>
+              <Heart size={16} className="text-teal-600" />
+              <p className="text-xs font-medium text-teal-900">Birth Success</p>
             </div>
-            <p className="text-2xl font-bold text-purple-600">100%</p>
+            <p className="text-2xl font-bold text-teal-600">100%</p>
           </div>
           
           <div className="bg-amber-50 rounded-lg p-4">
@@ -460,8 +460,8 @@ export default function Breeding() {
         <div className="xl:col-span-1 space-y-4">
           {/* Dam (Current Animal) Details */}
           <div className="bg-white rounded-lg border border-slate-200">
-            <div className="px-4 py-3 bg-purple-50 border-b border-purple-200">
-              <h3 className="text-sm font-semibold text-purple-900">Dam (Mother)</h3>
+            <div className="px-4 py-3 bg-teal-50 border-b border-teal-200">
+              <h3 className="text-sm font-semibold text-teal-900">Dam (Mother)</h3>
             </div>
             <div className="p-4">
               <Link 
@@ -490,7 +490,7 @@ export default function Breeding() {
               </div>
               <Link 
                 to={`/livestock/${id}`}
-                className="mt-4 w-full px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center"
+                className="mt-4 w-full px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center"
               >
                 View Full Profile
               </Link>

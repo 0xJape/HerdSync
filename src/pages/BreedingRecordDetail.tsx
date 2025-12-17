@@ -272,7 +272,7 @@ export default function BreedingRecordDetail() {
         {/* Main Content */}
         <div className="xl:col-span-2 space-y-6">
           {/* 3-Month Breeding Check */}
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-6">
+          <div className="bg-gradient-to-r from-indigo-50 to-cyan-50 border border-indigo-200 rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-slate-900">3-Month Breeding Check</h2>
               {isOverdue && (
@@ -305,7 +305,7 @@ export default function BreedingRecordDetail() {
                 className="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
               >
                 <CheckCircle size={18} className="mr-2" />
-                Confirmed Pregnant
+                Confirm
               </button>
               <button 
                 onClick={() => handleConfirmPregnancy('open')}
@@ -457,7 +457,7 @@ export default function BreedingRecordDetail() {
                 ) : (
                   <>
                     <CheckCircle size={18} className="mr-2" />
-                    Confirmed Pregnant
+                    Confirm
                   </>
                 )}
               </button>

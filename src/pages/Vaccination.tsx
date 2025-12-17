@@ -165,7 +165,7 @@ export default function Vaccination() {
   const livestockIdFromUrl = searchParams.get('livestockId');
   
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [statusFilter, setStatusFilter] = React.useState<'all' | 'completed' | 'due-soon' | 'overdue'>('all');
+  const [treatmentTypeFilter, setTreatmentTypeFilter] = React.useState<'all' | 'Vaccine' | 'Antibiotics' | 'Dewormer' | 'Vitamins' | 'Anti-Inflammatory'>('all');
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isBatchMode, setIsBatchMode] = React.useState(false);
   const [selectedLivestock, setSelectedLivestock] = React.useState<string[]>([]);
@@ -262,10 +262,21 @@ export default function Vaccination() {
   // Handle confirmation form input changes
   const handleConfirmationInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setConfirmationFormData({
-      ...confirmationFormData,
-      [name]: value
-    });
+    
+    // Auto-set dosage unit when treatment name is selected
+    if (name === 'treatmentName') {
+      const dosageUnit = drugDosageUnits[value] || confirmationFormData.dosageUnit || 'ml';
+      setConfirmationFormData({
+        ...confirmationFormData,
+        [name]: value,
+        dosageUnit
+      });
+    } else {
+      setConfirmationFormData({
+        ...confirmationFormData,
+        [name]: value
+      });
+    }
   };
   
   // Treatment types with medicines - organized by category (matches schema tables)
@@ -293,6 +304,31 @@ export default function Vaccination() {
       'Levamisole Hydrochloride/Triclabendazole'
     ]
   });
+
+  // Drug-specific dosage unit mapping
+  const drugDosageUnits: { [key: string]: string } = {
+    // Vaccines
+    'FMD Vaccine': 'ml',
+    'Brucellosis Vaccine': 'ml',
+    'CDT Vaccine': 'ml',
+    'Rabies Vaccine': 'ml',
+    
+    // Vitamins
+    'Electrolytes + Amino Acids + Vitamin B Complex': 'ml',
+    'Vitamin B1, B2, B3, B6 + B12': 'ml',
+    
+    // Antibiotics - mix of injectable and tablets
+    'Oxytetracycline (Oxytet LA)': 'ml',
+    'Penicillin G Procaine': 'cc',
+    'Streptomycin Sulfate (Penstrep LA)': 'ml',
+    
+    // Anti-Inflammatory - mix of injectable and tablets
+    'Dexamethasone': 'mg',
+    
+    // Dewormers
+    'Doramectin (Dectomax)': 'ml',
+    'Levamisole Hydrochloride/Triclabendazole': 'tablet'
+  };
   
   // Form data matching Vaccination_Records table schema
   const [formData, setFormData] = React.useState({
@@ -321,8 +357,11 @@ export default function Vaccination() {
       let nextDueDate = '';
       let setReminder = false;
       let notes = formData.notes;
+      let dosageUnit = 'ml'; // Default dosage unit
       
+      // Auto-adjust dosage unit based on treatment type
       if (value === 'Vitamins') {
+        dosageUnit = 'ml'; // Vitamins typically in ml
         // Vitamins: Every 2 weeks
         const dueDate = new Date();
         dueDate.setDate(dueDate.getDate() + 14);
@@ -330,33 +369,48 @@ export default function Vaccination() {
         setReminder = true;
         notes = notes || 'Scheduled for routine vitamin supplementation every 2 weeks';
       } else if (value === 'Dewormer') {
+        dosageUnit = 'ml'; // Dewormers typically in ml
         // Dewormer: Every 3-6 months (default to 3 months)
         const dueDate = new Date();
         dueDate.setMonth(dueDate.getMonth() + 3);
         nextDueDate = dueDate.toISOString().split('T')[0];
         setReminder = true;
         notes = notes || 'Scheduled for routine deworming (3-6 months interval, adjust as needed)';
-      } else if (value === 'Antibiotics' || value === 'Anti-Inflammatory') {
-        // Antibiotics/Anti-Inflammatory: Only when sick, no automatic scheduling
-        // Set 3-day checkup if pain/symptoms remain
+      } else if (value === 'Antibiotics') {
+        dosageUnit = 'ml'; // Antibiotics typically in ml
+        // Antibiotics: Only when sick, no automatic scheduling
         nextDueDate = '';
         setReminder = false;
-        if (value === 'Antibiotics') {
-          notes = notes || '⚠️ AMR Treatment - 21 day withdrawal period. Checkup required every 3 days if symptoms persist.';
-        } else {
-          notes = notes || '⚠️ Monitor for pain. If pain persists, checkup required every 3 days.';
-        }
+        notes = notes || '⚠️ AMR Treatment - 21 day withdrawal period. Checkup required every 3 days if symptoms persist.';
+      } else if (value === 'Anti-Inflammatory') {
+        dosageUnit = 'mg'; // Anti-inflammatory typically in mg
+        // Anti-Inflammatory: Only when sick, no automatic scheduling
+        nextDueDate = '';
+        setReminder = false;
+        notes = notes || '⚠️ Monitor for pain. If pain persists, checkup required every 3 days.';
+      } else if (value === 'Vaccine') {
+        dosageUnit = 'ml'; // Vaccines typically in ml
       }
       
       setFormData({
         ...formData,
         [name]: type === 'checkbox' ? checked : value,
         treatmentName: '',
+        dosageUnit, // Auto-set dosage unit
         nextDueDate,
         setReminder,
         notes
       });
       setShowAddVaccine(false);
+    } else if (name === 'treatmentName') {
+      // Auto-set dosage unit based on specific drug selected
+      const dosageUnit = drugDosageUnits[value] || formData.dosageUnit || 'ml';
+      
+      setFormData({
+        ...formData,
+        [name]: value,
+        dosageUnit
+      });
     } else if (name === 'administeredDate') {
       // Update withdrawal end date when administered date changes
       let withdrawalEndDate = formData.withdrawalEndDate;
@@ -510,9 +564,9 @@ export default function Vaccination() {
     const matchesSearch = record.livestockId.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          record.livestockName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          record.treatmentName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || record.status === statusFilter;
+    const matchesTreatmentType = treatmentTypeFilter === 'all' || record.treatmentType === treatmentTypeFilter;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesTreatmentType;
   });
 
   const totalVaccinations = vaccinationRecords.length;
@@ -610,14 +664,16 @@ export default function Vaccination() {
             </div>
 
             <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              value={treatmentTypeFilter}
+              onChange={(e) => setTreatmentTypeFilter(e.target.value as any)}
               className="px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
-              <option value="all">All Status</option>
-              <option value="completed">Completed</option>
-              <option value="due-soon">Due Soon</option>
-              <option value="overdue">Overdue</option>
+              <option value="all">All Treatments</option>
+              <option value="Vaccine">Vaccines</option>
+              <option value="Antibiotics">Antibiotics</option>
+              <option value="Dewormer">Dewormers</option>
+              <option value="Vitamins">Vitamins</option>
+              <option value="Anti-Inflammatory">Anti-Inflammatory</option>
             </select>
           </div>
 
@@ -783,7 +839,7 @@ export default function Vaccination() {
                     case 'Antibiotics': return { bg: 'bg-red-50', border: 'border-red-200', badge: 'bg-red-200 text-red-900' };
                     case 'Dewormer': return { bg: 'bg-amber-50', border: 'border-amber-200', badge: 'bg-amber-200 text-amber-900' };
                     case 'Vitamins': return { bg: 'bg-emerald-50', border: 'border-emerald-200', badge: 'bg-emerald-200 text-emerald-900' };
-                    case 'Anti-Inflammatory': return { bg: 'bg-purple-50', border: 'border-purple-200', badge: 'bg-purple-200 text-purple-900' };
+                    case 'Anti-Inflammatory': return { bg: 'bg-teal-50', border: 'border-teal-200', badge: 'bg-teal-200 text-teal-900' };
                     default: return { bg: 'bg-slate-50', border: 'border-slate-200', badge: 'bg-slate-200 text-slate-900' };
                   }
                 };
@@ -1101,7 +1157,13 @@ export default function Vaccination() {
                       name="dosageUnit"
                       value={formData.dosageUnit}
                       onChange={handleInputChange}
-                      className="px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      disabled={!!formData.treatmentName && !!drugDosageUnits[formData.treatmentName]}
+                      className={`px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                        formData.treatmentName && drugDosageUnits[formData.treatmentName] 
+                          ? 'bg-slate-100 text-slate-600 cursor-not-allowed' 
+                          : ''
+                      }`}
+                      title={formData.treatmentName && drugDosageUnits[formData.treatmentName] ? 'Auto-set based on drug' : ''}
                     >
                       <option value="ml">ml</option>
                       <option value="cc">cc</option>
@@ -1506,7 +1568,13 @@ export default function Vaccination() {
                       name="dosageUnit"
                       value={confirmationFormData.dosageUnit}
                       onChange={handleConfirmationInputChange}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      disabled={!!confirmationFormData.treatmentName && !!drugDosageUnits[confirmationFormData.treatmentName]}
+                      className={`w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                        confirmationFormData.treatmentName && drugDosageUnits[confirmationFormData.treatmentName]
+                          ? 'bg-slate-100 text-slate-600 cursor-not-allowed'
+                          : ''
+                      }`}
+                      title={confirmationFormData.treatmentName && drugDosageUnits[confirmationFormData.treatmentName] ? 'Auto-set based on drug' : ''}
                       required
                     >
                       <option value="ml">ml</option>

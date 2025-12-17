@@ -305,7 +305,7 @@ export default function PregnancyDetail() {
       case 'Mid':
         return 'bg-amber-100 text-amber-800';
       case 'Late':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-teal-100 text-teal-800';
       case 'Overdue':
         return 'bg-red-100 text-red-800';
       default:
@@ -365,7 +365,7 @@ export default function PregnancyDetail() {
       </div>
 
       {/* Progress Overview Card */}
-      <div className="bg-gradient-to-r from-primary-50 to-purple-50 rounded-lg border border-primary-200 p-6">
+      <div className="bg-gradient-to-r from-primary-50 to-cyan-50 rounded-lg border border-primary-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-sm font-medium text-slate-600">Gestation Progress</p>
@@ -386,7 +386,7 @@ export default function PregnancyDetail() {
         <div className="w-full bg-white rounded-full h-6 shadow-inner">
           <div
             className={`h-6 rounded-full transition-all flex items-center justify-end pr-2 ${
-              pregnancy.gestationProgress >= 100 ? 'bg-red-500' : 'bg-gradient-to-r from-primary-500 to-purple-500'
+              pregnancy.gestationProgress >= 100 ? 'bg-red-500' : 'bg-gradient-to-r from-primary-500 to-teal-500'
             }`}
             style={{ width: `${Math.min(pregnancy.gestationProgress, 100)}%` }}
           >
@@ -429,8 +429,8 @@ export default function PregnancyDetail() {
 
         <div className="bg-white rounded-lg border border-slate-200 p-5">
           <div className="flex items-center space-x-3 mb-3">
-            <div className="p-2 bg-purple-50 rounded-lg">
-              <Activity className="text-purple-600" size={20} />
+            <div className="p-2 bg-teal-50 rounded-lg">
+              <Activity className="text-teal-600" size={20} />
             </div>
             <p className="text-sm font-medium text-slate-700">Total Checkups</p>
           </div>
@@ -511,82 +511,64 @@ export default function PregnancyDetail() {
 
         {/* Right Column - Checkup History */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Latest Checkup (Most Recent) */}
+          {/* Latest Checkup (Most Recent) - Compact Version */}
           {pregnancy.checkupHistory.length > 0 && (() => {
             const latestCheckup = pregnancy.checkupHistory[pregnancy.checkupHistory.length - 1];
             return (
-              <div className="bg-gradient-to-br from-emerald-50 via-blue-50 to-emerald-50 rounded-lg border-2 border-emerald-300 p-6 shadow-lg">
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-emerald-100 rounded-lg">
-                      <Stethoscope className="text-emerald-700" size={24} />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-slate-900">Latest Checkup</h3>
-                      <p className="text-sm text-slate-600">Most recent examination</p>
-                    </div>
-                  </div>
-                  <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 shadow-sm">
+              <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-lg border border-emerald-300 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-base font-bold text-slate-900 flex items-center">
+                    <Stethoscope className="mr-2 text-emerald-600" size={18} />
+                    Latest Checkup
+                  </h3>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
                     CURRENT
                   </span>
                 </div>
 
-                <div className="bg-white rounded-lg p-5 border border-emerald-200 shadow-sm">
-                  {/* Checkup Header */}
-                  <div className="flex items-center justify-between mb-5">
+                <div className="bg-white rounded-lg p-3 border border-slate-200">
+                  <div className="grid grid-cols-2 gap-3 mb-3">
                     <div>
-                      <p className="text-base font-bold text-slate-900">{latestCheckup.month}</p>
-                      <p className="text-sm text-slate-600">
-                        {new Date(latestCheckup.date).toLocaleDateString('en-US', {
-                          month: 'long',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
+                      <p className="text-xs text-slate-600">Date & Month</p>
+                      <p className="text-sm font-bold text-slate-900">{latestCheckup.month}</p>
+                      <p className="text-xs text-slate-600">
+                        {new Date(latestCheckup.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </p>
                     </div>
-                    <span className={`px-3 py-1.5 rounded-full text-sm font-bold shadow-sm ${getHealthStatusColor(latestCheckup.healthStatus)}`}>
-                      {latestCheckup.healthStatus}
-                    </span>
-                  </div>
-
-                  {/* Vital Stats */}
-                  <div className="grid grid-cols-3 gap-4 mb-5 p-4 bg-gradient-to-r from-slate-50 to-blue-50 rounded-lg border border-slate-200">
                     <div>
-                      <p className="text-xs font-semibold text-slate-600">BCS</p>
-                      <p className="text-2xl font-bold text-slate-900">{latestCheckup.bcs}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-slate-600">Weight</p>
-                      <p className="text-2xl font-bold text-slate-900">{latestCheckup.weight} kg</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-slate-600">Veterinarian</p>
-                      <p className="text-sm font-bold text-slate-900">{latestCheckup.veterinarian}</p>
+                      <p className="text-xs text-slate-600">Status</p>
+                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold ${getHealthStatusColor(latestCheckup.healthStatus)}`}>
+                        {latestCheckup.healthStatus}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Findings */}
-                  <div className="mb-4">
-                    <p className="text-xs font-bold text-slate-700 mb-2">Findings:</p>
-                    <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded border border-slate-200">{latestCheckup.findings}</p>
+                  <div className="grid grid-cols-3 gap-3 mb-3 p-2 bg-slate-50 rounded">
+                    <div>
+                      <p className="text-xs text-slate-600">BCS</p>
+                      <p className="text-lg font-bold text-slate-900">{latestCheckup.bcs}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-600">Weight</p>
+                      <p className="text-lg font-bold text-slate-900">{latestCheckup.weight} kg</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-600">Vet</p>
+                      <p className="text-xs font-bold text-slate-900">{latestCheckup.veterinarian}</p>
+                    </div>
                   </div>
 
-                  {/* Recommendations */}
-                  <div className="mb-4">
-                    <p className="text-xs font-bold text-slate-700 mb-2">Recommendations:</p>
-                    <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded border border-slate-200">{latestCheckup.recommendations}</p>
-                  </div>
-
-                  {/* Next Checkup */}
-                  <div className="flex items-center space-x-2 text-sm text-blue-700 bg-blue-50 px-4 py-3 rounded-lg border border-blue-200 font-semibold">
-                    <Calendar size={16} />
-                    <span>
-                      Next checkup: {new Date(latestCheckup.nextCheckupDate).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </span>
+                  <div className="space-y-2 text-xs">
+                    <div>
+                      <span className="font-semibold text-slate-700">Findings:</span>
+                      <p className="text-slate-700 mt-1">{latestCheckup.findings}</p>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-700">Next:</span>
+                      <span className="text-blue-700 ml-2">
+                        {new Date(latestCheckup.nextCheckupDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -595,8 +577,8 @@ export default function PregnancyDetail() {
 
           {/* Previous Checkups History */}
           {pregnancy.checkupHistory.length > 1 && (
-            <div className="bg-white rounded-lg border border-slate-200 p-6">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-white rounded-lg border border-slate-200 p-4">
+              <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-semibold text-slate-900 flex items-center">
                   <Activity className="mr-2 text-slate-600" size={20} />
                   Previous Checkups
@@ -606,67 +588,52 @@ export default function PregnancyDetail() {
                 </span>
               </div>
 
-              <div className="space-y-4">
-                {pregnancy.checkupHistory.slice(0, -1).reverse().map((checkup, index) => (
-                  <div key={checkup.id} className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-lg p-5 border border-slate-200 hover:border-slate-300 transition-colors">
-                    {/* Checkup Header */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <p className="text-sm font-bold text-slate-900">{checkup.month}</p>
-                        <p className="text-xs text-slate-600">
+              {/* Table Format */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 border-b-2 border-slate-200">
+                    <tr>
+                      <th className="text-left px-3 py-2 font-semibold text-slate-700">Date</th>
+                      <th className="text-left px-3 py-2 font-semibold text-slate-700">Month</th>
+                      <th className="text-center px-3 py-2 font-semibold text-slate-700">BCS</th>
+                      <th className="text-center px-3 py-2 font-semibold text-slate-700">Weight</th>
+                      <th className="text-center px-3 py-2 font-semibold text-slate-700">Status</th>
+                      <th className="text-left px-3 py-2 font-semibold text-slate-700">Findings</th>
+                      <th className="text-left px-3 py-2 font-semibold text-slate-700">Next Checkup</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {pregnancy.checkupHistory.slice(0, -1).reverse().map((checkup, index) => (
+                      <tr key={checkup.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-3 py-3 text-slate-900">
                           {new Date(checkup.date).toLocaleDateString('en-US', {
-                            month: 'long',
+                            month: 'short',
                             day: 'numeric',
                             year: 'numeric'
                           })}
-                        </p>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${getHealthStatusColor(checkup.healthStatus)}`}>
-                        {checkup.healthStatus}
-                      </span>
-                    </div>
-
-                    {/* Vital Stats */}
-                    <div className="grid grid-cols-3 gap-4 mb-4 p-3 bg-white rounded-lg border border-slate-100">
-                      <div>
-                        <p className="text-xs text-slate-500">BCS</p>
-                        <p className="text-lg font-bold text-slate-900">{checkup.bcs}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500">Weight</p>
-                        <p className="text-lg font-bold text-slate-900">{checkup.weight} kg</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500">Veterinarian</p>
-                        <p className="text-xs font-medium text-slate-900">{checkup.veterinarian}</p>
-                      </div>
-                    </div>
-
-                    {/* Findings */}
-                    <div className="mb-3">
-                      <p className="text-xs font-semibold text-slate-700 mb-1">Findings:</p>
-                      <p className="text-sm text-slate-700 bg-white p-2 rounded">{checkup.findings}</p>
-                    </div>
-
-                    {/* Recommendations */}
-                    <div className="mb-3">
-                      <p className="text-xs font-semibold text-slate-700 mb-1">Recommendations:</p>
-                      <p className="text-sm text-slate-700 bg-white p-2 rounded">{checkup.recommendations}</p>
-                    </div>
-
-                    {/* Next Checkup */}
-                    <div className="flex items-center space-x-2 text-xs text-blue-700 bg-blue-50 px-3 py-2 rounded">
-                      <Calendar size={14} />
-                      <span className="font-medium">
-                        Next checkup: {new Date(checkup.nextCheckupDate).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                        </td>
+                        <td className="px-3 py-3 text-slate-900 font-medium">{checkup.month}</td>
+                        <td className="px-3 py-3 text-center font-bold text-slate-900">{checkup.bcs}</td>
+                        <td className="px-3 py-3 text-center font-bold text-slate-900">{checkup.weight} kg</td>
+                        <td className="px-3 py-3 text-center">
+                          <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold ${getHealthStatusColor(checkup.healthStatus)}`}>
+                            {checkup.healthStatus}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-slate-700 text-xs max-w-xs">
+                          <div className="line-clamp-2">{checkup.findings}</div>
+                        </td>
+                        <td className="px-3 py-3 text-slate-600 text-xs">
+                          {new Date(checkup.nextCheckupDate).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
@@ -869,16 +836,25 @@ export default function PregnancyDetail() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Findings & Observations <span className="text-red-500">*</span>
+                  Checkup Type <span className="text-red-500">*</span>
                 </label>
-                <textarea
+                <select
                   value={checkupFormData.findings}
                   onChange={(e) => setCheckupFormData({ ...checkupFormData, findings: e.target.value })}
-                  rows={3}
-                  placeholder="Describe the physical examination findings, fetal movement, overall condition..."
                   required
                   className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
+                >
+                  <option value="">Select checkup type...</option>
+                  <option value="Routine Monthly Checkup">Routine Monthly Checkup</option>
+                  <option value="Fetal Development Assessment">Fetal Development Assessment</option>
+                  <option value="Nutritional Status Evaluation">Nutritional Status Evaluation</option>
+                  <option value="Fetal Movement Monitoring">Fetal Movement Monitoring</option>
+                  <option value="Udder Development Check">Udder Development Check</option>
+                  <option value="Pre-Calving Assessment">Pre-Calving Assessment</option>
+                  <option value="Emergency Pregnancy Check">Emergency Pregnancy Check</option>
+                  <option value="Post-Treatment Follow-up">Post-Treatment Follow-up</option>
+                </select>
+                <p className="text-xs text-slate-500 mt-1">Standard pregnancy monitoring procedures</p>
               </div>
 
               <div>
@@ -1085,10 +1061,22 @@ export default function PregnancyDetail() {
                           className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
                         >
                           <option value="">Select vigor</option>
-                          <option value="Strong">Strong - Active, alert</option>
-                          <option value="Moderate">Moderate - Fair activity</option>
-                          <option value="Weak">Weak - Needs care ⚠️</option>
-                          <option value="Very Weak">Very Weak - Critical ⚠️</option>
+                          {(birthFormData.calvingProblem === 'Stillborn' || 
+                            birthFormData.calvingProblem === 'Died Shortly After' || 
+                            birthFormData.calvingProblem === 'Mummified') ? (
+                            <>
+                              <option value="Stillborn">Stillborn - Born dead</option>
+                              <option value="Died Shortly After">Died shortly after birth</option>
+                              <option value="Mummified">Mummified</option>
+                            </>
+                          ) : (
+                            <>
+                              <option value="Strong">Strong - Active, alert</option>
+                              <option value="Moderate">Moderate - Fair activity</option>
+                              <option value="Weak">Weak - Needs care ⚠️</option>
+                              <option value="Very Weak">Very Weak - Critical ⚠️</option>
+                            </>
+                          )}
                         </select>
                       </div>
 
@@ -1100,7 +1088,11 @@ export default function PregnancyDetail() {
                           type="text"
                           value={off.condition}
                           onChange={(e) => updateOffspring(index, 'condition', e.target.value)}
-                          placeholder="e.g., Healthy and active, Requires monitoring"
+                          placeholder={(birthFormData.calvingProblem === 'Stillborn' || 
+                                       birthFormData.calvingProblem === 'Died Shortly After' || 
+                                       birthFormData.calvingProblem === 'Mummified') 
+                                      ? "e.g., Stillborn, No visible abnormalities" 
+                                      : "e.g., Healthy and active, Requires monitoring"}
                           required
                           className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
                         />

@@ -127,10 +127,10 @@ export default function Home() {
       <footer className="border-t border-slate-200 py-8 mt-16">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <p className="text-slate-600 text-sm font-medium mb-2">
-            HerdSync: Development of a Web-Based Livestock Information Management System
+            HerdSync: Development of a Livestock Management Information System
           </p>
           <p className="text-slate-500 text-xs">
-            College of Agriculture Animal Science Farm • Mindanao State University – General Santos City
+            College of Agriculture Animal Science Farm • Mindanao State University – General Santos
           </p>
           <p className="text-slate-400 text-xs mt-3">
             © 2025 HerdSync. All rights reserved.

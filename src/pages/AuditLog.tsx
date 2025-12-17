@@ -147,7 +147,7 @@ export default function AuditLog() {
   const getActionColor = (action: string) => {
     switch (action) {
       case 'CREATE': return 'bg-blue-100 text-blue-700';
-      case 'UPDATE': return 'bg-purple-100 text-purple-700';
+      case 'UPDATE': return 'bg-teal-100 text-teal-700';
       case 'VIEW': return 'bg-slate-100 text-slate-700';
       case 'EXPORT': return 'bg-emerald-100 text-emerald-700';
       default: return 'bg-slate-100 text-slate-700';

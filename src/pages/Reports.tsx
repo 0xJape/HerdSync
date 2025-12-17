@@ -15,16 +15,24 @@ const livestockInventory = {
 export default function Reports() {
   const selectedSpecies = 'cattle';
   const [showPrintPreview, setShowPrintPreview] = React.useState(false);
+  const [pricePerKg, setPricePerKg] = React.useState(130);
+  const [calfPrice, setCalfPrice] = React.useState(10000);
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
+  // Calculate values dynamically based on input prices
+  const selectedData = livestockInventory.cattle.map(item => {
+    const price = item.kind === 'CALF' ? calfPrice : pricePerKg;
+    const value = item.avgWeight > 0 ? item.avgWeight * price * item.qty : item.qty * price;
+    return { ...item, pricePerKg: price, value };
+  });
+
   // Calculate totals for selected species
-  const selectedData = livestockInventory.cattle;
   const totalQty = selectedData.reduce((sum, item) => sum + item.qty, 0);
   const totalValue = selectedData.reduce((sum, item) => sum + item.value, 0);
 
   // Calculate grand totals
-  const grandTotal = livestockInventory.cattle.reduce((sum, item) => sum + item.qty, 0);
-  const grandTotalValue = livestockInventory.cattle.reduce((sum, item) => sum + item.value, 0);
+  const grandTotal = selectedData.reduce((sum, item) => sum + item.qty, 0);
+  const grandTotalValue = selectedData.reduce((sum, item) => sum + item.value, 0);
 
   // Export to CSV in the inventory format
   const handleExportCSV = () => {
@@ -144,6 +152,48 @@ export default function Reports() {
               <Printer size={16} />
               <span>Print</span>
             </button>
+          </div>
+        </div>
+
+        {/* Price Configuration - No Print */}
+        <div className="bg-white rounded-lg border border-slate-200 p-6 no-print">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">💰 Price Configuration</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Price per kg for Mature Cattle (₱)
+              </label>
+              <input
+                type="number"
+                value={pricePerKg}
+                onChange={(e) => setPricePerKg(Number(e.target.value) || 0)}
+                min="0"
+                step="0.01"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="130"
+              />
+              <p className="text-xs text-slate-500 mt-1">Used for Bulls, Cows, Heifers, Yearlings</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Fixed Price per Calf (₱)
+              </label>
+              <input
+                type="number"
+                value={calfPrice}
+                onChange={(e) => setCalfPrice(Number(e.target.value) || 0)}
+                min="0"
+                step="0.01"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="10000"
+              />
+              <p className="text-xs text-slate-500 mt-1">Fixed price per calf regardless of weight</p>
+            </div>
+          </div>
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-xs text-blue-900">
+              💡 <strong>Tip:</strong> Adjust these prices based on current market rates. Changes will automatically update all calculations and valuations in the report below.
+            </p>
           </div>
         </div>
 
@@ -272,6 +322,31 @@ export default function Reports() {
             </h2>
             <h3 className="text-base font-semibold text-slate-900 mt-2">REPORT OF INVENTORY</h3>
             <p className="text-sm text-slate-900 mt-2">AS OF {currentDate}</p>
+          </div>
+
+          {/* Data Basis Section */}
+          <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
+            <h4 className="text-xs font-bold text-slate-900 mb-2 uppercase">Data Basis & Methodology</h4>
+            <div className="grid grid-cols-2 gap-4 text-xs text-slate-700">
+              <div>
+                <span className="font-semibold">Report Date:</span> {currentDate}
+              </div>
+              <div>
+                <span className="font-semibold">Data Source:</span> HerdSync Management System
+              </div>
+              <div>
+                <span className="font-semibold">Total Records:</span> {totalQty} cattle across {selectedData.length} categories
+              </div>
+              <div>
+                <span className="font-semibold">Valuation Method:</span> Average weight × Price per kg
+              </div>
+              <div className="col-span-2">
+                <span className="font-semibold">Included Categories:</span> {selectedData.map(item => item.kind).join(', ')}
+              </div>
+              <div className="col-span-2">
+                <span className="font-semibold">Calculation Basis:</span> Physical inventory count with current market pricing (₱{selectedData[0]?.pricePerKg}/kg for mature cattle)
+              </div>
+            </div>
           </div>
 
           {/* Inventory Table */}

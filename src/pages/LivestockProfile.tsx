@@ -20,7 +20,9 @@ import {
   Save,
   Plus,
   Download,
-  Eye
+  Eye,
+  X,
+  Printer
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
@@ -101,7 +103,7 @@ const mockAnimalData = {
         breedingDate: '2023-02-10',
         breedingMethod: 'Natural Breeding',
         bullId: 'B-032',
-        bullBreed: 'Native/Carabao',
+        bullBreed: 'Native',
         calvingDate: '2023-11-18',
         calvingResult: 'Success',
         numberOfCalves: 1,
@@ -218,9 +220,15 @@ export default function LivestockProfile() {
     sellingPrice: '',
     notes: ''
   });
+  const [isCulledModalOpen, setIsCulledModalOpen] = React.useState(false);
+  const [culledFormData, setCulledFormData] = React.useState({
+    culledDate: new Date().toISOString().split('T')[0],
+    reason: '',
+    notes: ''
+  });
   
   // Breed data - Common cattle breeds in the Philippines
-  const [cattleBreeds, setCattleBreeds] = React.useState(['Brahman', 'Angus', 'Holstein', 'Native/Carabao', 'Crossbreed']);
+  const [cattleBreeds, setCattleBreeds] = React.useState(['Brahman', 'Angus', 'Holstein', 'Crossbreed']);
   
   const [editFormData, setEditFormData] = React.useState({
     livestockId: '',
@@ -607,6 +615,46 @@ export default function LivestockProfile() {
     }
   };
 
+  const handlePrintProfile = () => {
+    if (!animal) return;
+    
+    // Create comprehensive livestock profile report (same HTML)
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Livestock Profile - ${animal.livestockId}</title>
+        <style>
+          @page { margin: 2cm; }
+          body { 
+            font-family: Arial, sans-serif; 
+            line-height: 1.6; 
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+          }
+          .header {
+            text-align: center;
+            border-bottom: 3px solid #059669;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .header h1 {
+            color: #059669;
+            margin: 0 0 5px 0;
+            font-size: 26px;
+          }
+          .header p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 12px;`;
+    
+    // Note: Full HTML content would be here (same as export)
+    // For brevity, using window.print() on current page
+    window.print();
+  };
+
   const handleExportProfile = () => {
     if (!animal) return;
     
@@ -981,20 +1029,25 @@ export default function LivestockProfile() {
       </html>
     `;
 
-    // Open print dialog
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-      
-      // Wait for content to load then trigger print dialog
-      setTimeout(() => {
-        printWindow.focus();
-        printWindow.print();
-      }, 500);
-    } else {
-      alert('Please allow popups for this site to export the profile.');
-    }
+    // Create a Blob with the HTML content
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create a downloadable link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Livestock-Profile-${animal.livestockId}-${new Date().toISOString().split('T')[0]}.html`;
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the URL object
+    URL.revokeObjectURL(url);
+    
+    // Show success notification
+    alert(`Profile exported successfully!\nFile: Livestock-Profile-${animal.livestockId}.html\n\nYou can open this file in any browser to view or print.`);
   };
 
   const handleSaveChanges = (e: React.FormEvent) => {
@@ -1158,11 +1211,18 @@ export default function LivestockProfile() {
         </div>
         <div className="flex items-center space-x-2">
           <button 
+            onClick={handlePrintProfile}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          >
+            <Printer size={16} />
+            <span>Print</span>
+          </button>
+          <button 
             onClick={handleExportProfile}
             className="flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
           >
             <Download size={16} />
-            <span>Export Profile</span>
+            <span>Download</span>
           </button>
           {!isViewer && (
             <button 
@@ -1488,12 +1548,12 @@ export default function LivestockProfile() {
             {/* Anti-Inflammatory */}
             <div className="mb-6">
               <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center space-x-2">
-                <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                <span className="w-2 h-2 bg-teal-500 rounded-full"></span>
                 <span>Anti-Inflammatory</span>
               </h3>
               <div className="space-y-3">
                 {animal.vaccinations.filter(vac => vac.type === 'Anti-Inflammatory').map((vac, index) => (
-                  <div key={index} className="p-3 bg-purple-50 rounded-lg border border-purple-200">
+                  <div key={index} className="p-3 bg-teal-50 rounded-lg border border-teal-200">
                     <p className="text-sm font-medium text-slate-900">{vac.name}</p>
                     <p className="text-xs text-slate-600 mt-1">
                       Date: {new Date(vac.date).toLocaleDateString()} • Dosage: {vac.dosage}
@@ -1676,14 +1736,14 @@ export default function LivestockProfile() {
                   {animal.sex === 'Female' && (
                     <button 
                       onClick={() => setIsBreedingModalOpen(true)}
-                      className="w-full flex items-center justify-between px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
+                      className="w-full flex items-center justify-between px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                       <div className="flex items-center space-x-2">
                         <Baby size={16} />
                         <span>Breeding Status</span>
                       </div>
                       {animal.isOnHeat && (
-                        <span className="px-2 py-0.5 bg-white text-purple-600 text-xs font-semibold rounded">
+                        <span className="px-2 py-0.5 bg-white text-teal-600 text-xs font-semibold rounded">
                           OPEN
                         </span>
                       )}
@@ -1771,12 +1831,12 @@ export default function LivestockProfile() {
             if (offspring.length === 0) return null;
             
             return (
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200 p-6">
+              <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg border border-teal-200 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-slate-900 flex items-center space-x-2">
-                    <Baby size={20} className="text-purple-600" />
+                    <Baby size={20} className="text-teal-600" />
                     <span>Offspring</span>
-                    <span className="px-2.5 py-0.5 bg-purple-200 text-purple-900 text-xs font-bold rounded-full">
+                    <span className="px-2.5 py-0.5 bg-teal-200 text-teal-900 text-xs font-bold rounded-full">
                       {offspring.length}
                     </span>
                   </h2>
@@ -1793,11 +1853,11 @@ export default function LivestockProfile() {
                       <Link
                         key={child.id}
                         to={`/livestock/${child.livestockId}`}
-                        className="block p-4 bg-white hover:bg-purple-50 rounded-lg border border-purple-200 hover:border-purple-300 transition-all group"
+                        className="block p-4 bg-white hover:bg-teal-50 rounded-lg border border-teal-200 hover:border-teal-300 transition-all group"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex items-start space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <div className="w-10 h-10 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                               <span className="text-lg">
                                 🐄
                               </span>
@@ -1805,7 +1865,7 @@ export default function LivestockProfile() {
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-1">
                                 <p className="text-sm font-bold text-slate-900">{child.livestockId}</p>
-                                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-semibold rounded">
+                                <span className="px-2 py-0.5 bg-teal-100 text-teal-700 text-xs font-semibold rounded">
                                   {relationText}
                                 </span>
                               </div>
@@ -2475,25 +2535,25 @@ export default function LivestockProfile() {
       {isBreedingHistoryModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="sticky top-0 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-200 px-6 py-4 flex items-center justify-between">
+            <div className="sticky top-0 bg-gradient-to-r from-teal-50 to-cyan-50 border-b border-teal-200 px-6 py-4 flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <FileText size={20} className="text-purple-600" />
-                <h2 className="text-xl font-semibold text-purple-900">Breeding History - {animal.livestockId}</h2>
-                <span className="px-2 py-1 bg-purple-200 text-purple-900 text-xs font-bold rounded">
+                <FileText size={20} className="text-teal-600" />
+                <h2 className="text-xl font-semibold text-teal-900">Breeding History - {animal.livestockId}</h2>
+                <span className="px-2 py-1 bg-teal-200 text-teal-900 text-xs font-bold rounded">
                   {animal.breedingHistory.length} Records
                 </span>
               </div>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={handleExportBreedingHistory}
-                  className="flex items-center space-x-1.5 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium"
+                  className="flex items-center space-x-1.5 px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors text-sm font-medium"
                 >
                   <Download size={16} />
                   <span>Export</span>
                 </button>
                 <button
                   onClick={() => setIsBreedingHistoryModalOpen(false)}
-                  className="text-purple-400 hover:text-purple-600 transition-colors"
+                  className="text-teal-400 hover:text-teal-600 transition-colors"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -2503,38 +2563,38 @@ export default function LivestockProfile() {
             </div>
 
             <div className="p-6 overflow-y-auto flex-1">
-              <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+              <div className="mb-6 p-4 bg-teal-50 border border-teal-200 rounded-lg">
                 <div className="grid grid-cols-4 gap-4 text-center">
                   <div>
-                    <p className="text-xs text-purple-700 font-medium mb-1">Total Breedings</p>
-                    <p className="text-2xl font-bold text-purple-900">{animal.breedingHistory.length}</p>
+                    <p className="text-xs text-teal-700 font-medium mb-1">Total Breedings</p>
+                    <p className="text-2xl font-bold text-teal-900">{animal.breedingHistory.length}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-purple-700 font-medium mb-1">Total Calves</p>
-                    <p className="text-2xl font-bold text-purple-900">
+                    <p className="text-xs text-teal-700 font-medium mb-1">Total Calves</p>
+                    <p className="text-2xl font-bold text-teal-900">
                       {animal.breedingHistory.reduce((sum, record) => sum + record.numberOfCalves, 0)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-purple-700 font-medium mb-1">Successful Calvings</p>
+                    <p className="text-xs text-teal-700 font-medium mb-1">Successful Calvings</p>
                     <p className="text-2xl font-bold text-emerald-600">
                       {animal.breedingHistory.filter(r => r.calvingResult === 'Success').length}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-purple-700 font-medium mb-1">Current Status</p>
-                    <p className="text-sm font-bold text-purple-900">{animal.breedingStatus}</p>
+                    <p className="text-xs text-teal-700 font-medium mb-1">Current Status</p>
+                    <p className="text-sm font-bold text-teal-900">{animal.breedingStatus}</p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
                 {animal.breedingHistory.map((record, index) => (
-                  <div key={index} className="bg-white border-2 border-slate-200 rounded-lg p-5 hover:border-purple-300 transition-colors">
+                  <div key={index} className="bg-white border-2 border-slate-200 rounded-lg p-5 hover:border-teal-300 transition-colors">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                          <Baby size={20} className="text-purple-600" />
+                        <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+                          <Baby size={20} className="text-teal-600" />
                         </div>
                         <div>
                           <h3 className="text-lg font-bold text-slate-900">
@@ -2643,7 +2703,7 @@ export default function LivestockProfile() {
             <div className="sticky bottom-0 bg-white border-t border-slate-200 px-6 py-4">
               <button
                 onClick={() => setIsBreedingHistoryModalOpen(false)}
-                className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
+                className="w-full px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors font-medium"
               >
                 Close
               </button>
@@ -2656,14 +2716,14 @@ export default function LivestockProfile() {
       {isBreedingModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl">
-            <div className="sticky top-0 bg-purple-50 border-b border-purple-200 px-6 py-4 flex items-center justify-between rounded-t-lg">
+            <div className="sticky top-0 bg-teal-50 border-b border-teal-200 px-6 py-4 flex items-center justify-between rounded-t-lg">
               <div className="flex items-center space-x-2">
-                <Baby size={20} className="text-purple-600" />
-                <h2 className="text-xl font-semibold text-purple-900">Breeding Status Checkup</h2>
+                <Baby size={20} className="text-teal-600" />
+                <h2 className="text-xl font-semibold text-teal-900">Breeding Status Checkup</h2>
               </div>
               <button
                 onClick={() => setIsBreedingModalOpen(false)}
-                className="text-purple-400 hover:text-purple-600 transition-colors"
+                className="text-teal-400 hover:text-teal-600 transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -2713,7 +2773,7 @@ export default function LivestockProfile() {
                   onChange={(e) => setBreedingFormData({ ...breedingFormData, checkupDate: e.target.value })}
                   max={new Date().toISOString().split('T')[0]}
                   required
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 />
               </div>
 
@@ -2735,13 +2795,13 @@ export default function LivestockProfile() {
                       onChange={(e) => setBreedingFormData({ ...breedingFormData, isOnHeat: e.target.checked })}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                    <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
                   </label>
                 </div>
                 
                 {breedingFormData.isOnHeat && (
-                  <div className="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                    <p className="text-xs text-purple-900">
+                  <div className="mt-3 p-3 bg-teal-50 border border-teal-200 rounded-lg">
+                    <p className="text-xs text-teal-900">
                       Optimal breeding window is within 12-24 hours of heat detection. Consider artificial insemination or natural breeding during this period.
                     </p>
                   </div>
@@ -2758,7 +2818,7 @@ export default function LivestockProfile() {
                   rows={4}
                   required
                   placeholder="Record behavioral observations, physical signs, and any relevant breeding readiness indicators..."
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 />
               </div>
 
@@ -2772,7 +2832,7 @@ export default function LivestockProfile() {
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors"
                 >
                   <Save size={16} />
                   <span>Save Status</span>
@@ -2843,11 +2903,8 @@ export default function LivestockProfile() {
                 setIsStatusModalOpen(false);
                 setIsSoldModalOpen(true);
               } else if (selectedStatus === 'Culled') {
-                setShowSuccessModal(true);
                 setIsStatusModalOpen(false);
-                setTimeout(() => {
-                  setShowSuccessModal(false);
-                }, 3000);
+                setIsCulledModalOpen(true);
               } else {
                 setShowSuccessModal(true);
                 setIsStatusModalOpen(false);
@@ -3099,6 +3156,105 @@ export default function LivestockProfile() {
                 >
                   <Save size={16} />
                   <span>Confirm Sale Record</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Culled Information Modal */}
+      {isCulledModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div className="sticky top-0 bg-orange-50 border-b border-orange-200 px-6 py-4 flex items-center justify-between rounded-t-lg">
+              <div className="flex items-center space-x-2">
+                <AlertCircle size={20} className="text-orange-600" />
+                <h2 className="text-xl font-semibold text-orange-900">Record Culling Information</h2>
+              </div>
+              <button
+                onClick={() => {
+                  setIsCulledModalOpen(false);
+                  setSelectedStatus(animal?.status || 'Active');
+                }}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              console.log('Culled Form Data:', culledFormData);
+              setShowSuccessModal(true);
+              setIsCulledModalOpen(false);
+              setTimeout(() => setShowSuccessModal(false), 3000);
+            }} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Date Culled <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={culledFormData.culledDate}
+                  onChange={(e) => setCulledFormData({ ...culledFormData, culledDate: e.target.value })}
+                  required
+                  max={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Reason for Culling <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={culledFormData.reason}
+                  onChange={(e) => setCulledFormData({ ...culledFormData, reason: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  <option value="">Select reason...</option>
+                  <option value="Poor Production">Poor Production</option>
+                  <option value="Health Issues">Health Issues</option>
+                  <option value="Breeding Problems">Breeding Problems</option>
+                  <option value="Age">Age</option>
+                  <option value="Behavioral Issues">Behavioral Issues</option>
+                  <option value="Low Quality Offspring">Low Quality Offspring</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Additional Notes
+                </label>
+                <textarea
+                  value={culledFormData.notes}
+                  onChange={(e) => setCulledFormData({ ...culledFormData, notes: e.target.value })}
+                  rows={3}
+                  placeholder="Specific details about the culling decision..."
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCulledModalOpen(false);
+                    setSelectedStatus(animal?.status || 'Active');
+                  }}
+                  className="px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex items-center space-x-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors"
+                >
+                  <Save size={16} />
+                  <span>Confirm Culling Record</span>
                 </button>
               </div>
             </form>

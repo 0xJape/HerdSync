@@ -845,9 +845,9 @@ export default function BreedingOverview() {
                 </div>
               ) : (
                 /* Artificial Insemination - Semen Details */
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
                   <div className="flex items-center space-x-2 mb-4">
-                    <span className="text-sm font-semibold text-purple-900">🧬 Semen Details</span>
+                    <span className="text-sm font-semibold text-teal-900">🧬 Semen Details</span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
@@ -921,8 +921,8 @@ export default function BreedingOverview() {
                       className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                   </div>
-                  <div className="mt-3 bg-purple-100 border border-purple-300 rounded-lg p-3">
-                    <p className="text-xs text-purple-800">
+                  <div className="mt-3 bg-teal-100 border border-teal-300 rounded-lg p-3">
+                    <p className="text-xs text-teal-800">
                       ℹ️ <strong>Artificial Insemination:</strong> Ensure semen is properly stored and handled. Record all batch information for traceability and genetic tracking.
                     </p>
                   </div>

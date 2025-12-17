@@ -335,7 +335,7 @@ export default function Pregnancy() {
       case 'Mid':
         return 'bg-amber-100 text-amber-800';
       case 'Late':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-teal-100 text-teal-800';
       case 'Overdue':
         return 'bg-red-100 text-red-800';
       default:
@@ -389,7 +389,7 @@ export default function Pregnancy() {
       {/* Summary Cards - Simplified */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total Confirmed Pregnancies */}
-        <div className="bg-gradient-to-br from-primary-50 to-purple-50 rounded-lg border border-primary-200 p-4">
+        <div className="bg-gradient-to-br from-primary-50 to-cyan-50 rounded-lg border border-primary-200 p-4">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
@@ -412,23 +412,23 @@ export default function Pregnancy() {
             </div>
             <div className="text-center">
               <p className="text-slate-600">Late</p>
-              <p className="font-bold text-purple-600">{lateStage}</p>
+              <p className="font-bold text-teal-600">{lateStage}</p>
             </div>
           </div>
         </div>
 
         {/* Due This Month */}
-        <div className="bg-white rounded-lg border border-slate-200 p-4 hover:border-purple-300 transition-colors">
+        <div className="bg-white rounded-lg border border-slate-200 p-4 hover:border-teal-300 transition-colors">
           <div className="flex items-center justify-between mb-2">
-            <div className="p-2 bg-purple-50 rounded-lg">
-              <Calendar className="text-purple-600" size={18} />
+            <div className="p-2 bg-teal-50 rounded-lg">
+              <Calendar className="text-teal-600" size={18} />
             </div>
-            <span className="px-2 py-0.5 bg-purple-100 text-purple-800 text-xs font-bold rounded-full">
+            <span className="px-2 py-0.5 bg-teal-100 text-teal-800 text-xs font-bold rounded-full">
               URGENT
             </span>
           </div>
           <p className="text-xs text-slate-600 mb-1">Due This Month</p>
-          <p className="text-2xl font-bold text-purple-600 mb-1">{dueThisMonth}</p>
+          <p className="text-2xl font-bold text-teal-600 mb-1">{dueThisMonth}</p>
           <p className="text-xs text-slate-500">Expected births in December</p>
         </div>
 
@@ -767,7 +767,7 @@ export default function Pregnancy() {
             {/* Modal Content */}
             <div className="p-6 space-y-6">
               {/* Progress Overview */}
-              <div className="bg-gradient-to-r from-primary-50 to-purple-50 rounded-lg p-6">
+              <div className="bg-gradient-to-r from-primary-50 to-cyan-50 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <p className="text-sm font-medium text-slate-600">Gestation Progress</p>

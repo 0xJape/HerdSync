@@ -169,7 +169,7 @@ function ActivityLogItem({ action, description, user, timestamp, entityType, ent
     added: { Icon: Plus, text: 'text-emerald-700', bg: 'bg-emerald-50', label: 'Added' },
     edited: { Icon: Edit, text: 'text-blue-700', bg: 'bg-blue-50', label: 'Edited' },
     deleted: { Icon: Trash2, text: 'text-red-700', bg: 'bg-red-50', label: 'Deleted' },
-    health_check: { Icon: HeartPulse, text: 'text-purple-700', bg: 'bg-purple-50', label: 'Health' },
+    health_check: { Icon: HeartPulse, text: 'text-teal-700', bg: 'bg-teal-50', label: 'Health' },
     vaccination: { Icon: CheckCircle, text: 'text-teal-700', bg: 'bg-teal-50', label: 'Vaccine' },
     breeding: { Icon: Users, text: 'text-amber-700', bg: 'bg-amber-50', label: 'Breeding' },
   };
@@ -390,8 +390,55 @@ export default function Dashboard() {
             <div className="p-4">
               {/* Circular Chart */}
               <div className="flex flex-col items-center mb-4">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center drop-shadow-md mb-2">
-                  <div className="w-24 h-24 rounded-full bg-white flex flex-col items-center justify-center">
+                <div className="relative w-32 h-32 rounded-full flex items-center justify-center drop-shadow-md mb-2">
+                  {/* Multi-color ring showing distribution */}
+                  <svg className="absolute inset-0 w-32 h-32 -rotate-90" viewBox="0 0 128 128">
+                    {/* Bulls - Blue - 3/25 = 12% = 43.2deg */}
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r="56"
+                      fill="none"
+                      stroke="#3b82f6"
+                      strokeWidth="16"
+                      strokeDasharray="43.2 316.8"
+                      strokeDashoffset="0"
+                    />
+                    {/* Cows - Emerald - 11/25 = 44% = 158.4deg */}
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r="56"
+                      fill="none"
+                      stroke="#10b981"
+                      strokeWidth="16"
+                      strokeDasharray="158.4 201.6"
+                      strokeDashoffset="-43.2"
+                    />
+                    {/* Heifers - Amber - 8/25 = 32% = 115.2deg */}
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r="56"
+                      fill="none"
+                      stroke="#f59e0b"
+                      strokeWidth="16"
+                      strokeDasharray="115.2 244.8"
+                      strokeDashoffset="-201.6"
+                    />
+                    {/* Calves - Purple - 3/25 = 12% = 43.2deg */}
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r="56"
+                      fill="none"
+                      stroke="#a855f7"
+                      strokeWidth="16"
+                      strokeDasharray="43.2 316.8"
+                      strokeDashoffset="-316.8"
+                    />
+                  </svg>
+                  <div className="w-24 h-24 rounded-full bg-white flex flex-col items-center justify-center z-10">
                     <div className="text-2xl font-bold text-slate-900">25</div>
                     <div className="text-xs text-slate-500">Total</div>
                   </div>
@@ -437,10 +484,10 @@ export default function Dashboard() {
                   </div>
                 </div>
                 
-                <div className="bg-white rounded-lg p-2.5 border border-purple-100 hover:shadow-md transition-shadow">
+                <div className="bg-white rounded-lg p-2.5 border border-teal-100 hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <div className="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-teal-500"></div>
                       <span className="text-xs font-medium text-slate-600">Calves</span>
                     </div>
                     <div className="text-right">
@@ -580,13 +627,13 @@ export default function Dashboard() {
                 
                 {/* Area under line */}
                 <path
-                  d="M 0,230 L 0,200 L 16.67,180 L 33.33,170 L 50,150 L 66.67,140 L 83.33,100 L 100,100 V 256 H 0 Z"
+                  d="M 0,256 L 0,157 L 16.67,143 L 33.33,136 L 50,121 L 66.67,114 L 83.33,43 L 100,29 V 256 H 0 Z"
                   fill="url(#areaGradient)"
                 />
                 
                 {/* Main line - Total */}
                 <path
-                  d="M 0,200 L 16.67,180 L 33.33,170 L 50,150 L 66.67,140 L 83.33,100 L 100,100"
+                  d="M 0,157 L 16.67,143 L 33.33,136 L 50,121 L 66.67,114 L 83.33,43 L 100,29"
                   fill="none"
                   stroke="#3b82f6"
                   strokeWidth="3"
@@ -595,14 +642,14 @@ export default function Dashboard() {
                   vectorEffect="non-scaling-stroke"
                 />
                 
-                {/* Data points */}
-                <circle cx="0%" cy="78%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
-                <circle cx="16.67%" cy="70%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
-                <circle cx="33.33%" cy="66%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
-                <circle cx="50%" cy="58%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
-                <circle cx="66.67%" cy="55%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
-                <circle cx="83.33%" cy="39%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
-                <circle cx="100%" cy="39%" r="5" fill="#3b82f6" stroke="white" strokeWidth="2" />
+                {/* Data points - Jul:52, Aug:55, Sep:57, Oct:60, Nov:62, Dec:67, Jan:67 */}
+                <circle cx="0%" cy="61%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
+                <circle cx="16.67%" cy="56%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
+                <circle cx="33.33%" cy="53%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
+                <circle cx="50%" cy="47%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
+                <circle cx="66.67%" cy="45%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
+                <circle cx="83.33%" cy="17%" r="4" fill="white" stroke="#3b82f6" strokeWidth="2" />
+                <circle cx="100%" cy="11%" r="5" fill="#3b82f6" stroke="white" strokeWidth="2" />
               </svg>
               
               {/* X-axis labels */}
